@@ -4,6 +4,7 @@ from java.util import HashMap
 import shutil
 import requests
 import os
+
 DEFAULT_SCREEN_SHOT_PATH = "/sdcard/"
 DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
 
@@ -199,4 +200,244 @@ def _press_move(x, y):
     return engine_api("/press_move", {"x": x, "y": y})
 
 
+# -----------------
 
+import json
+import re
+import random
+
+from typing import Union, List
+from inner import *
+
+PROJECT_DIR = "/sdcard/Yyds.Py/test"
+
+
+# 请求查找图片
+class RequestFindImage:
+    name: str
+    path: str
+    prob: float
+
+    def __init__(self, name: str, path: str, prob: float):
+        self.name = name
+        self.path = path
+        self.prob = prob
+
+    def __repr__(self):
+        return '{{ name="{}",path="{}",prob={}}}'.format(self.name, self.path, self.prob)
+
+
+# 返回查找到的图片
+class ResFindImage:
+    name: str
+    path: str
+    prob: float
+    width: int
+    height: int
+    x: int
+    y: int
+
+    def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
+        self.name = name
+        self.path = path
+        self.prob = prob
+        self.width = width
+        self.height = height
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return '{{name="{}",path="{}",prob={},width={},height={},x={},y={}}}'.format(self.name, self.path, self.prob,
+                                                                                     self.width, self.height, self.x,
+                                                                                     self.y)
+
+
+# yolo返回
+class ResYolo:
+    label: str
+    cx: int
+    cy: int
+    x: float
+    y: float
+    w: float
+    h: float
+    prob: float
+
+    def __init__(self, label: str, cx: int, cy: int, x: float, y: float, w: float, h: float, prob: float):
+        self.label = label
+        self.cx = cx
+        self.cy = cy
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.prob = prob
+
+    def __repr__(self):
+        return '{{label="{}",cx={},cy={},x={},y={},w={},h={},prob={}}}'.format(self.label, self.cx, self.cy, self.x,
+                                                                               self.y, self.w, self.h, self.prob)
+
+
+class ResOcr:
+    prob: float
+    text: str
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+    x4: float
+    y4: float
+
+    def __init__(self, prob: float, text: str, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float,
+                 x4: float, y4: float):
+        self.prob = prob
+        self.text = text
+        self.x1 = x1
+        self.y1 = y1
+        self.x2 = x2
+        self.y2 = y2
+        self.x3 = x3
+        self.y3 = y3
+        self.x4 = x4
+        self.y4 = y4
+
+    def __repr__(self):
+        return '{{ prob={},text="{}",x1={},y1={},x2={},y2={},x3={},y3={},x4={},y4={} }}'.format(self.prob, self.text,
+                                                                                                self.x1, self.y1,
+                                                                                                self.x2, self.y2,
+                                                                                                self.x3, self.y3,
+                                                                                                self.x4, self.y4)
+
+
+# 获取资源完整路径
+def res(res_path: str):
+    global PROJECT_DIR
+    return '{}/{}'.format(PROJECT_DIR, res_path.replace('./', ''))
+
+
+# 查找图片
+def yy_find_image(fd_images: List[Union[str, RequestFindImage]], prob: float = 0.9) -> List[ResFindImage]:
+    in_list: List[RequestFindImage] = list()
+    for fd in fd_images:
+        if type(fd) is str:
+            in_list.append(RequestFindImage(fd, fd, prob))
+        elif type(fd) is RequestFindImage:
+            if fd.prob == 0:
+                fd.prob = prob
+            in_list.append(fd)
+
+    fd_paths: List[str] = list()
+    for it in in_list:
+        fd_paths.append(it.path)
+    str_fds: str = screen_find_image(";".join(fd_paths))
+    sp_fds = str_fds.split('\n')
+    results: List[ResFindImage] = list()
+    index = 0
+    for fd in sp_fds:
+        if fd != "":
+            it = in_list[index]
+            result = re.match(r'(.*)\t(\d+.\d+) (\d+),(\d+) (\d+),(\d+)', fd).groups()
+            fd_image = ResFindImage(
+                it.name,
+                result[0],
+                float(result[1]),
+                int(result[2]),
+                int(result[3]),
+                int(result[4]),
+                int(result[5])
+            )
+            if fd_image.prob >= it.prob:
+                results.append(fd_image)
+            index = index + 1
+    return results
+
+
+# 查找第一张图片
+def yy_find_image_first(fd_images: List[Union[str, RequestFindImage]], prob: float = 0.9) -> Union[ResFindImage, None]:
+    find_images = yy_find_image(fd_images, prob)
+    if len(find_images) > 0:
+        return find_images[0]
+    return None
+
+
+def yy_yolo_find(labels=None, prob: float = 0.9) -> List[ResYolo]:
+    if labels is None:
+        labels = []
+    str_fds = screen_yolo_locate()
+    sp_fds = str_fds.split('\n')
+    results: List[ResYolo] = list()
+    for fd in sp_fds:
+        if fd != "":
+            result = re.match(
+                r'{label=\'(.*)\', cx=(\d+), cy=(\d+), x=(\d+.\d+), y=(\d+.\d+), w=(\d+.\d+), h=(\d+.\d+), prob=(\d+.\d+)}',
+                fd).groups()
+            res_yolo = ResYolo(
+                result[0],
+                int(result[1]),
+                int(result[2]),
+                float(result[3]),
+                float(result[4]),
+                float(result[5]),
+                float(result[6]),
+                float(result[7]),
+            )
+            if res_yolo.prob >= prob:
+                if len(labels) > 0:
+                    for it in labels:
+                        if re.match(it, res_yolo.label):
+                            results.append(res_yolo)
+                else:
+                    results.append(res_yolo)
+    return results
+
+
+# 查找第一个yolo
+def yy_yolo_find_first(labels=None, prob: float = 0.9) -> Union[ResYolo, None]:
+    if labels is None:
+        labels = []
+    find_yolos = yy_yolo_find(labels, prob)
+    if len(find_yolos) > 0:
+        return find_yolos[0]
+    return None
+
+
+# 随机click
+def random_click(x: int, y: int, w: int, h: int):
+    x = x
+    y = y
+    y += h * 0.25 + random.uniform(h * 0.25, h * 0.75)
+    x += w * 0.25 + random.uniform(w * 0.25, w * 0.75)
+    click(x, y)
+
+
+def find_ocr(texts=None) -> List[ResOcr]:
+    if texts is None:
+        texts = []
+    fd_ocr_str: str = screen_ocr()
+    fd_sp = fd_ocr_str.split('\n')
+    results: List[ResOcr] = list()
+    for fd in fd_sp:
+        if fd != "":
+            prob, text, pos_split = fd.split('\t')
+            result = re.match(r'(\d+),(\d+) (\d+),(\d+) (\d+),(\d+) (\d+),(\d+)', pos_split).groups()
+            res = ResOcr(prob, text, result[0], result[1], result[2], result[3], result[4], result[5], result[6],
+                         result[7])
+            if len(texts) > 0:
+                for it in texts:
+                    if re.match(it, res.text):
+                        results.append(res)
+            else:
+                results.append(res)
+    return results
+
+
+# 查找第一个findOcr
+def find_ocr_first(texts=None) -> Union[ResYolo, None]:
+    if texts is None:
+        texts = []
+    find_ocrs = find_ocr(texts)
+    if len(find_ocrs) > 0:
+        return find_ocrs[0]
+    return None
