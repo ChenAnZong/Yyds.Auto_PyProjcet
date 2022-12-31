@@ -4,6 +4,8 @@ from java.util import HashMap
 import shutil
 import requests
 import os
+import random
+import re
 
 DEFAULT_SCREEN_SHOT_PATH = "/sdcard/"
 DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
@@ -25,6 +27,17 @@ def engine_api(uri: str, options=None):
         for key in options.keys():
             params.put(key, str(options[key]))
     return EngineApi.http(uri, params)
+
+
+def __handle_screen_rect_args(args: dict, x=None, y=None, w=None, h=None):
+    if x is not None:
+        args["x"] = x
+    if w is not None:
+        args["w"] = w
+    if h is not None:
+        args["h"] = h
+    if y is not None:
+        args["y"] = y
 
 
 def toast(content: str):
@@ -89,8 +102,10 @@ def device_code():
     return engine_api("/imei")
 
 
-def screen_ocr():
-    return engine_api("/screen-ocr")
+def screen_ocr(x=None, y=None, w=None, h=None, use_gpu=True):
+    args = {"use_gpu": "true" if use_gpu else "false"}
+    __handle_screen_rect_args(args, x, y, w, h)
+    return engine_api("/screen-ocr", args)
 
 
 def image_ocr(image_path):
@@ -98,8 +113,10 @@ def image_ocr(image_path):
     return engine_api("/image-ocr", {"path": image_path})
 
 
-def screen_yolo_locate():
-    return engine_api("/key-locate")
+def screen_yolo_locate(x=None, y=None, w=None, h=None, use_gpu=True):
+    args = {"use_gpu": "true" if use_gpu else "false"}
+    __handle_screen_rect_args(args, x, y, w, h)
+    return engine_api("/key-locate", args)
 
 
 def model_yolo_reload(ncnn_bin_path, ncnn_param_path):
@@ -118,14 +135,7 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None):
     """
     imgs_ = [i if os.path.exists(i) else os.path.join(os.getcwd(), i) for i in img]
     args = {"templates": ";".join(imgs_)}
-    if x is not None:
-        args["x"] = x
-    if w is not None:
-        args["w"] = w
-    if h is not None:
-        args["h"] = h
-    if y is not None:
-        args["y"] = y
+    __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
 
 
@@ -201,13 +211,8 @@ def _press_move(x, y):
 
 
 # -----------------
-
-import json
-import re
-import random
-
 from typing import Union, List
-from inner import *
+
 
 PROJECT_DIR = "/sdcard/Yyds.Py/test"
 

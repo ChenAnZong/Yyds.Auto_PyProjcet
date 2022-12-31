@@ -8,6 +8,7 @@ import funfunc
 # import PIL
 # import flask
 # import websockets
+import inner
 
 
 def test_output():
@@ -74,7 +75,8 @@ def main_():
 
 
 def main():
-    pass
+    print(inner.engine_api("/image-area"))
+
 
 
 
