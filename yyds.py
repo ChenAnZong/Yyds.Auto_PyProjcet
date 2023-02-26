@@ -250,7 +250,7 @@ class DeviceForegroundResponse:
             return self.package + self.activity_name
 
     def __repr__(self):
-        return 'DeviceForegroundResponse {{ package="{}",activity="{}",pid={} }}'.format(self.package, self.activity_name, self.pid)
+        return 'DeviceForegroundResponse {{ package="{}", activity="{}", pid={} }}'.format(self.package, self.activity_name, self.pid)
 
 
 def device_foreground() -> Optional[DeviceForegroundResponse]:
@@ -545,7 +545,7 @@ class RequestFindImage:
         self.min_prob = min_prob    # 要求最低置信率
 
     def __str__(self):
-        return 'RequestFindImage {{ name="{}", path="{}", min_prob={}}}'.format(self.name, self.path, self.min_prob)
+        return 'RequestFindImage {{ name="{}", path="{}", min_prob={} }}'.format(self.name, self.path, self.min_prob)
 
     def __repr__(self):
         return str(self)
@@ -592,7 +592,7 @@ class ResYolo:
         return str(self)
 
     def __str__(self):
-        return 'ResYolo {label="{}", cx={}, cy={}, x={}, y={}, w={}, h={}, prob={}}'.format(self.label, self.cx,
+        return 'ResYolo {{label="{}", cx={}, cy={}, x={}, y={}, w={}, h={}, prob={} }}'.format(self.label, self.cx,
                                                                                             self.cy, self.x,
                                                                                             self.y, self.w, self.h,
                                                                                             self.prob)
@@ -634,8 +634,11 @@ class ResOcr:
         return int((self.y1 + self.y3) / 2)
 
     def __str__(self):
-        return 'ResOcr { prob={}, text="{}", x1={}, y1={}, x2={}, y2={}, x3={}, y3={}, x4={}, y4={} }' \
+        return 'ResOcr# {{ prob={}, text="{}", x1={}, y1={}, x2={}, y2={}, x3={}, y3={}, x4={}, y4={} }}' \
             .format(self.prob, self.text, self.x1, self.y1, self.x2, self.y2, self.x3, self.y3, self.x4, self.y4)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage, ...]],
@@ -785,8 +788,8 @@ def screen_ocr_x(specific_texts: Union[list, tuple] = None, x=None, y=None, w=No
         if fd != "":
             prob, text, pos_split = fd.split('\t')
             result = re.match(r'(\d+),(\d+) (\d+),(\d+) (\d+),(\d+) (\d+),(\d+)', pos_split).groups()
-            res = ResOcr(prob, text, result[0], result[1], result[2], result[3], result[4], result[5], result[6],
-                         result[7])
+            res = ResOcr(prob, text, int(result[0]), int(result[1]), int(result[2]), int(result[3]),
+                         int(result[4]), int(result[5]), int(result[6]), int(result[7]))
             if len(specific_texts) > 0:
                 for it in specific_texts:
                     if re.match(it, res.text):

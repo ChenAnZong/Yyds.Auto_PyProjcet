@@ -79,9 +79,8 @@ def main():
     :return:
     """
     print("==============11")
-    # print(screen_ocr_first_x("蓝牙"))
-    # print(screen_find_image_x(("img/area_llq.jpg", "img/pdd.jpg", "img/setting.jpg",)))
-    print("是否存在11:", ui_match(text="水果看看"))
+    a = screen_ocr_x(("运行日志",), y=0.9)
+    print("是否存在11:", a[0].cx, a[0].cy)
 
 
 
