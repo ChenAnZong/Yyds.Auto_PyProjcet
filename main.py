@@ -5,10 +5,13 @@ import pickle
 import codecs
 import time
 import funfunc
-# import PIL
+from PIL import Image
 # import flask
 # import websockets
-import inner
+import yyds
+import flask
+import yyds
+from yyds import *
 
 
 def test_output():
@@ -52,10 +55,7 @@ def test_exception():
     a = 1 / 0
 
 
-print("代码工作目录:" + os.getcwd())
-
-
-def main_():
+def test1():
     """
     main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
     :return:
@@ -75,7 +75,11 @@ def main_():
 
 
 def main():
-    print(inner.engine_api("/image-area"))
+    print("==============")
+    # print(screen_ocr_first_x("蓝牙"))
+    # print(screen_find_image_x(("img/area_llq.jpg", "img/pdd.jpg", "img/setting.jpg",)))
+
+
 
 
 
