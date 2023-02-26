@@ -1,5 +1,6 @@
 import os
 import json
+import sys
 import threading
 import pickle
 import codecs
@@ -10,7 +11,8 @@ from PIL import Image
 # import websockets
 import yyds
 import flask
-import yyds
+import importlib
+
 from yyds import *
 
 
@@ -20,6 +22,7 @@ def test_output():
         print(f"循环输出:{i}")
 
 
+# 类定义示例
 class Person:
     def __init__(self, n, a):
         self.name = n
@@ -34,7 +37,7 @@ aa: Person
 
 def test_cache():
     """
-    缓存一些配置
+    测试缓存配置
     :return:
     """
     global aa
@@ -55,11 +58,7 @@ def test_exception():
     a = 1 / 0
 
 
-def test1():
-    """
-    main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
-    :return:
-    """
+def test_env():
     print("当前运行Py文件:" + __file__)
     print("代码工作目录:" + os.getcwd())
     print(f"当前线程: {threading.current_thread().native_id}")
@@ -75,10 +74,14 @@ def test1():
 
 
 def main():
-    print("==============")
+    """
+    main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
+    :return:
+    """
+    print("==============11")
     # print(screen_ocr_first_x("蓝牙"))
     # print(screen_find_image_x(("img/area_llq.jpg", "img/pdd.jpg", "img/setting.jpg",)))
-
+    print("是否存在11:", ui_match(text="水果看看"))
 
 
 
