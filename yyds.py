@@ -2,7 +2,7 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数; _开头为内部函数, 一般不对外使用
-@version (30) 3.50
+@version (32) 3.52
 """
 import json
 import shutil
@@ -262,7 +262,7 @@ def device_foreground() -> Optional[DeviceForegroundResponse]:
     s = result.split(" ")
     if len(s) < 2:
         return None
-    return DeviceForegroundResponse(result[0], result[1], result[2])
+    return DeviceForegroundResponse(s[0], s[1], s[2])
 
 
 def is_in_app(pkg:str) -> bool:
@@ -814,16 +814,24 @@ def screen_ocr_first_x(specific_texts=Union[list, tuple], x=None, y=None, w=None
     return None
 
 
-def paste(text: str):
-    """
-    粘贴文本, 支持输入中文, 需要目标应用读写粘贴板权限
-    目前存在一定兼容性, 请使用 input_text
-    """
-    return engine_api("/paste", {"text": str(text)})
-
-
 def input_text(text: str) -> int:
     """
     注入文本, 安卓系统限制, 不支持中文
     """
     return int(engine_api("/inject-text", {"text": str(text)}))
+
+
+def x_input_text(text: str) -> bool:
+    """
+    通过内置 YY 自动输入法输入文本, 需要手动到系统设置启动输入法并切换输入法
+    :return 仅代表是否发送成功, 不代表是否执行成功
+    """
+    return engine_api("/xinput-text", {"text": str(text)}) == "true"
+
+
+def x_input_clear() -> bool:
+    """
+    通过内置 YY 自动输入法清空编辑框文本, 需要手动到系统设置启动输入法并切换输入法
+       :return 仅代表是否发送成功, 不代表是否执行成功
+    """
+    return engine_api("/xinput-clear") == "true"

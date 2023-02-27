@@ -73,15 +73,24 @@ def test_env():
         print("读取文件内容:" + fr.read())
 
 
+def test_input_search():
+    """
+    比如在今日头条输入并搜索 "你好坏啊, 我好喜欢"
+    """
+    x_input_text("你好坏啊, 我好喜欢")
+    key_confirm()
+
+
 def main():
     """
     main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
     :return:
     """
-    print("==============11")
-    a = screen_ocr_x(("运行日志",), y=0.9)
-    print("是否存在11:", a[0].cx, a[0].cy)
-
+    print("==============11222")
+    # a = screen_ocr_x(("运行日志",), y=0.9)
+    # x_input_text("你好坏啊88")
+    # x_input_clear()
+    # x_input_clear()
 
 
 
