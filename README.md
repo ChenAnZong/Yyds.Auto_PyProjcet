@@ -1,5 +1,11 @@
 关于 api更新 & 项目例子
 
+![开发界面](show.png)
+
+## 新一代自动化引擎
+
+[APK以及开发插件下载地址 提取密码密码:yyds](https://chensiji.lanzoum.com/b00qihxte)
+
 [文档网站 https://yydsxx.com/docs/yyds-auto/script](https://yydsxx.com/docs/yyds-auto/script)
 
 
