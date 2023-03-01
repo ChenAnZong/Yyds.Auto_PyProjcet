@@ -1,6 +1,6 @@
 关于 api更新 & 项目例子
 
-![开发界面](show.png)
+![开发界面](https://gitee.com/MeetUnknown/yyds.-auto_-py-projcet/blob/master/show.png)
 
 ## 新一代自动化引擎
 
