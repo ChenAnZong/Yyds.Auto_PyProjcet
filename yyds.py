@@ -166,6 +166,13 @@ def key_home():
     engine_api('/key-code', {"code": "3"})
 
 
+def key_menu():
+    """
+    注入菜单键
+    """
+    engine_api("/key-code", {"code": "82"})
+
+
 def key_confirm():
     """
     确认键，一般用于编辑框确实搜索，确认提交
@@ -205,7 +212,7 @@ def open_app(pkg):
     """
     根据包名打开app
     """
-    return engine_api("/open-app", {"pkg", pkg})
+    return engine_api("/open-app", {"pkg": pkg})
 
 
 def open_url(url):

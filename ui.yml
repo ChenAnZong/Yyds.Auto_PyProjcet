@@ -1,0 +1,108 @@
+# 此处定义ui配置文件，# 开头为注释内容，注释内容可删掉，可随意改动
+# 一共六种ui类型 text; div; space; select; input; radio
+# 定义格式为 ui类型名-ui名字, 所有控件定义从上到下显示
+
+# 文本展示
+text-gg:
+  # 文本内容
+  value: "软件公告\n今天学习Python免费啦\n关注博主领取咯"
+  # 文本颜色
+  color: "#008305"
+
+  # 文字大小
+  size: 20
+
+# 一条分割线
+div-note---:
+
+text-note:
+  # 文本内容
+  value: "软件教程\n1.激活引擎\n2.获取授权\n3.快乐的开始啦啦啦" # 文本颜色
+  color: "#F89A49"
+
+  # 文字大小
+  size: 14
+
+text-note-1:
+  # 文本内容
+  value: "软件教程\n1.激活引擎\n2.获取授权\n3.快乐的开始啦啦啦" # 文本颜色
+  color: "#F89A49"
+
+  # 文字大小
+  size: 14
+
+text-note-2:
+  # 文本内容
+  value: "软件教程\n1.激活引擎\n2.获取授权\n3.快乐的开始啦啦啦" # 文本颜色
+  color: "#F89A49"
+
+  # 文字大小
+  size: 14
+
+text-note-3:
+  # 文本内容
+  value: "软件教程\n1.激活引擎\n2.获取授权\n3.快乐的开始啦啦啦" # 文本颜色
+  color: "#F89A49"
+
+  # 文字大小
+  size: 14
+
+
+
+
+# 高度100的占位空行
+space-gg:
+  height: 40
+
+# 一条分割线
+div-1:
+
+# 开关
+radio-1:
+  title: "输入文本"
+  value: true
+
+
+# 高度30的占位空行
+space-1:
+  height: 30
+
+select-1:
+  title: "🥰下拉选个你喜欢的"
+  color: "#008305"
+
+  value: ["选项一", "第选项二", "炫舞中, 大都", "最后的选择嘞"]
+
+# 高度50的占位空行
+space-2:
+  height: 50
+
+# 输入
+input-project:
+  title: "运行项目"
+  value: "发发发发发发财发财"
+
+space-3:
+  height: 20
+
+
+# 输入
+input-user:
+  title: "账号"
+  value: "输入您的账号"
+
+space-4:
+  height: 20
+
+# 输入
+input-passwrod:
+  title: "运行模式"
+  value: "运行模式1"
+
+text-note-4:
+  # 文本内容
+  value: "自主开发，更人性化更, 简单易学易用， 具有生产力的自动化软件，不依赖无障碍，实现如点击，滑动，截图，图片识别, busybox等功能, 并且使用为手机端极致优化的高性能神经网络的ncnn作为ai引擎, 内置前沿yolo与paddle ocr模型, 智能触手可及!使用Python作为脚本引擎，并附带Pycharm插件进行调试开发" # 文本颜色
+  color: "#F89A49"
+
+  # 文字大小
+  size: 14
