@@ -2,9 +2,10 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数; _开头为内部函数, 一般不对外使用
-@version (32) 3.52
+@version (36) 3.7
 """
 import json
+import yaml
 import shutil
 import sys
 import time
@@ -23,11 +24,18 @@ try:
 except:
     print(traceback.format_exc(), file=sys.stderr)
 
-PROJECT_DIR = "/sdcard/Yyds.Py/test"
-
 DEFAULT_SCREEN_SHOT_PATH = "/sdcard/"
 DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
+CWD = os.getcwd()
 DEBUG_MODE = True
+GLOBAL_CONFIG = dict()
+
+
+def current_project() -> str:
+    """
+    返回当前正在运行的工程名字
+    """
+    return os.path.basename(CWD)
 
 
 def random_click(x: int, y: int, w: int, h: int):
@@ -257,7 +265,8 @@ class DeviceForegroundResponse:
             return self.package + self.activity_name
 
     def __repr__(self):
-        return 'DeviceForegroundResponse {{ package="{}", activity="{}", pid={} }}'.format(self.package, self.activity_name, self.pid)
+        return 'DeviceForegroundResponse {{ package="{}", activity="{}", pid={} }}'.format(self.package,
+                                                                                           self.activity_name, self.pid)
 
 
 def device_foreground() -> Optional[DeviceForegroundResponse]:
@@ -272,7 +281,7 @@ def device_foreground() -> Optional[DeviceForegroundResponse]:
     return DeviceForegroundResponse(s[0], s[1], s[2])
 
 
-def is_in_app(pkg:str) -> bool:
+def is_in_app(pkg: str) -> bool:
     """
     @ 当前是否在某应用界面内
     :param pkg 应用包名
@@ -327,7 +336,7 @@ def image_ocr(image_path: str, x=None, y=None, w=None, h=None, use_gpu=True):
     :param h 高 可以使用相对坐标(0-1)
     :param use_gpu 是否使用Gpu运算, 性能差的手机不建议, 会导致手机掉帧
     """
-    image_path = image_path if os.path.exists(image_path) else os.path.join(os.getcwd(), image_path)
+    image_path = image_path if os.path.exists(image_path) else os.path.join(CWD, image_path)
     args = {"path": image_path, "use_gpu": "true" if use_gpu else "false"}
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/image-ocr", args)
@@ -379,7 +388,7 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None):
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
     """
-    imgs_ = [os.path.join(os.getcwd(), i) if os.path.exists(os.path.join(os.getcwd(), i)) else i for i in img]
+    imgs_ = [os.path.join(CWD, i) if os.path.exists(os.path.join(CWD, i)) else i for i in img]
     args = {"templates": ";".join(imgs_)}
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
@@ -389,6 +398,7 @@ class Node:
     """
     控件元素
     """
+
     def __init__(self, node_obj: dict):
         self.bound_str: str = node_obj.get("boundsString")
         self.child_count: int = node_obj.get("childCount")
@@ -409,6 +419,18 @@ class Node:
         self.is_scroll_able: bool = node_obj.get("isScrollable")
         self.is_selected: bool = node_obj.get("isSelected")
         self.is_visible: bool = node_obj.get("isVisible")
+
+    @property
+    def center_point(self) -> (int, int):
+        """
+        返回节点的中间坐标点
+        """
+        s = [i for i in re.split(r"\[|\]|,", self.bound_str) if i != ""]
+        x1 = int(s[0])
+        y1 = int(s[1])
+        x2 = int(s[2])
+        y2 = int(s[3])
+        return int((x1 + x2) / 2), int((y1 + y2) / 2)
 
     def __str__(self):
         return f"Node {{ class_name:{self.class_name}, bound_str:{self.bound_str}, child_count:{self.child_count}, " \
@@ -547,9 +569,9 @@ class RequestFindImage:
     """
 
     def __init__(self, name: str, path: str, min_prob: float):
-        self.name = name    # 传入的图片参数
-        self.path = path    # 传入的图片路径
-        self.min_prob = min_prob    # 要求最低置信率
+        self.name = name  # 传入的图片参数
+        self.path = path  # 传入的图片路径
+        self.min_prob = min_prob  # 要求最低置信率
 
     def __str__(self):
         return 'RequestFindImage {{ name="{}", path="{}", min_prob={} }}'.format(self.name, self.path, self.min_prob)
@@ -564,13 +586,21 @@ class ResFindImage:
     """
 
     def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
-        self.name = name    # 传入目标的图片路径参数
-        self.path = path    # 传入目标的图片路径
-        self.min_prob = prob    # 要求最低置信率
-        self.width = width      # 匹配到的图片宽(浮点运算原因, 可能与传入图片的宽相差1像素)
-        self.height = height    # 匹配到的图片高(浮点运算原因, 可能与传入图片的高相差1像素)
-        self.x = x              # 左上角 x
-        self.y = y              # 左上角 y
+        self.name = name  # 传入目标的图片路径参数
+        self.path = path  # 传入目标的图片路径
+        self.min_prob = prob  # 要求最低置信率
+        self.width = width  # 匹配到的图片宽(浮点运算原因, 可能与传入图片的宽相差1像素)
+        self.height = height  # 匹配到的图片高(浮点运算原因, 可能与传入图片的高相差1像素)
+        self.x = x  # 左上角 x
+        self.y = y  # 左上角 y
+
+    @property
+    def cx(self) -> int:
+        return int(self.x + self.width / 2)
+
+    @property
+    def cy(self) -> int:
+        return int(self.y + self.height / 2)
 
     def __str__(self):
         return f'ResFindImage {{ name=f"{self.name}", path=f"{self.path}", prob={self.min_prob}, width={self.width}, ' \
@@ -600,9 +630,9 @@ class ResYolo:
 
     def __str__(self):
         return 'ResYolo {{label="{}", cx={}, cy={}, x={}, y={}, w={}, h={}, prob={} }}'.format(self.label, self.cx,
-                                                                                            self.cy, self.x,
-                                                                                            self.y, self.w, self.h,
-                                                                                            self.prob)
+                                                                                               self.cy, self.x,
+                                                                                               self.y, self.w, self.h,
+                                                                                               self.prob)
 
 
 class ResOcr:
@@ -842,3 +872,68 @@ def x_input_clear() -> bool:
        :return 仅代表是否发送成功, 不代表是否执行成功
     """
     return engine_api("/xinput-clear") == "true"
+
+
+def _reload_config():
+    global GLOBAL_CONFIG
+    config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
+    try:
+        with open(config_path, mode="r") as fr:
+            GLOBAL_CONFIG = json.loads(fr.read())
+    except:
+        pass
+
+
+def read_config_value(config_name: str, read_load=False) -> Union[bool, str, int, None]:
+    """
+    可同时获取ui配置键值, 其中 select(字符串值配置), edit(字符串值配置), check(布尔值配置)为配置值 与 非ui配置键值
+
+    edit-user:
+      title: "账号"
+      value: "输入您的账号"
+    如 ui 配置如上, 则使用 read_config_value("edit-user") 进行获取
+
+    如果不存在config_name或config_name不可配置, 则返回 None
+    :param config_name ui名字
+    :param read_load 是否重新读取配置
+    """
+    global GLOBAL_CONFIG
+    if config_name in GLOBAL_CONFIG and not read_load:
+        return GLOBAL_CONFIG[config_name]
+    _reload_config()
+    if config_name in GLOBAL_CONFIG:
+        return GLOBAL_CONFIG[config_name]
+    else:
+        return None
+
+
+def read_ui_value(config_name: str):
+    """
+    读取 ui.yml 的 value
+    如果 用户未配置某个值, 你可以读取在ui.yml设置默认值并读取
+    """
+    if not os.path.exists("ui.yml"):
+        return None
+    else:
+        with open(r"ui.yml", mode="r", encoding="utf-8") as fr:
+            c = fr.read()
+            y = yaml.full_load(c)
+            return y[config_name]["value"]
+
+
+def write_config_value(config_name: str, value):
+    """
+    利用代码保存配置
+    :param config_name ui名字
+    :param value 值
+    
+    """
+    global GLOBAL_CONFIG
+    config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
+    with open(config_path, mode="w+") as frw:
+        try:
+            GLOBAL_CONFIG = json.loads(frw.read())
+        except:
+            pass
+        GLOBAL_CONFIG[config_name] = value
+        frw.write(json.dumps(GLOBAL_CONFIG, ensure_ascii=False))

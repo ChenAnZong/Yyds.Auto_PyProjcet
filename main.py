@@ -7,11 +7,6 @@ import codecs
 import time
 import funfunc
 from PIL import Image
-# import flask
-# import websockets
-import yyds
-import flask
-import importlib
 
 from yyds import *
 
@@ -86,7 +81,7 @@ def main():
     main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
     :return:
     """
-    print("=" * 40)
+    print("=+" * 20)
     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), " 开始运行")
     # test_output()
     # test_exception()
@@ -107,7 +102,7 @@ def main():
     # print(screen_ocr(x=300, use_gpu=True))
 
     # 指定区域 OCR, 查找指定文字
-    #print(screen_ocr_x(list("酷安"), y=0.1, h=400))
+    # print(screen_ocr_x(list("酷安"), y=0.1, h=400))
 
     # 找图
     # print(screen_find_image_x(("/img.area_llq.jpg", "pdd.jpg", "setting.jpg", ), x=0.2, y=300))
@@ -116,8 +111,23 @@ def main():
     # 按下菜单键
     # key_menu()
 
-    print("--")
+    # 获取用户的配置键值
+    # print(read_config_value("select-1"))
 
+    # 读取ui.yml的值, 注意select返回为数组
+    # print(read_ui_value("select-1"))
 
+    # print(ui_match(resource_id="com.wj.play:id/image_icon_con"))
+    # 如果 ui没有改变, 则可以从缓存匹配, 加快匹配速度
+    # print(ui_match(True, height="<50", width="<50"))
+
+    # 获取ui控件的中间坐标
+    # print(ui_match(resource_id="com.wj.play:id/image_icon_con")[0].center_point)
+
+    # 设置配置键值
+    # write_config_value("edit-user", "陈主任")
+
+    # 打开app
+    # open_app("com.coolapk.market")
 
 
