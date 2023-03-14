@@ -83,8 +83,10 @@ def main():
     """
     print("=+" * 20)
     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), " 开始运行")
-    # test_output()
+    test_output()
+
     # test_exception()
+
 
     # 点击坐标
     # click(1, 10)
@@ -126,6 +128,7 @@ def main():
 
     # 设置配置键值
     # write_config_value("edit-user", "陈主任")
+
 
     # 打开app
     # open_app("com.coolapk.market")

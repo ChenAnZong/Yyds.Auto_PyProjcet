@@ -216,6 +216,13 @@ def device_get_screen_size() -> (int, int):
     return int(x), int(y)
 
 
+def stop_app(pkg):
+    """
+    停止应用运行, 相当于从任务栏划掉app
+    """
+    return shell(f"am force-stop {pkg}")
+
+
 def open_app(pkg):
     """
     根据包名打开app
@@ -393,8 +400,6 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None):
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
 
-
-class Node:
     """
     控件元素
     """
@@ -431,6 +436,10 @@ class Node:
         x2 = int(s[2])
         y2 = int(s[3])
         return int((x1 + x2) / 2), int((y1 + y2) / 2)
+
+    def click_node(self):
+        x_, y_ = self.center_point
+        click(x_, y_)
 
     def __str__(self):
         return f"Node {{ class_name:{self.class_name}, bound_str:{self.bound_str}, child_count:{self.child_count}, " \

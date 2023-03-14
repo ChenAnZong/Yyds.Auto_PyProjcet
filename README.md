@@ -1,40 +1,26 @@
-关于 api更新 & 项目例子
+# 本项目为 Yyds.Auto api更新参考 & 项目例子
 
-![开发界面](https://gitee.com/MeetUnknown/yyds.-auto_-py-projcet/raw/master/show.png)
+| 文件/目录      | 作用                                 |
+|------------|------------------------------------|
+| main.py    | [必须] 程序**入口**文件                    |  
+| project.config | [必须] 项目**配置**文件                    |
+| funfunc.py | [可删] 实用自动化项目装饰器函数                  |
+| util.py    | [可删] 实用自动化项目函数, 高频使用函数             |
+| ui.yml     | [可删] 项目界面配置文件, 如果不需要任何`界面配置`, 则可删除 |  
+| _img_      | [重要] 区域截图默认保存位置, 一般找图的图片保存在此目录下    |  
+| content.txt | [可删] 测试文本读取的文件                     |
+| README.md  | [可删] 项目介绍文件                        |  
 
-## 新一代自动化引擎
 
+
+
+# 更多 & 参考
 [APK以及开发插件下载地址 提取密码密码:yyds](https://chensiji.lanzoum.com/b00qihxte)
 
 [文档网站 https://yydsxx.com/docs/yyds-auto/script](https://yydsxx.com/docs/yyds-auto/script)
 
+# 联系
+微信: wjzy_yyds
 
-## 创建工程示例
-1. 创建**project.config**文件, 这是一个简单的ini配置文件，根据你的实际配置变量，所有配置将会影响到你接下来的运行与调试
-```python title="工程目录/project.config"
-# 注意'#'开头为注释
-# [必填]工程名 支持中文英文数字组合，勿加特殊符号!
-PROJECT_NAME=test
 
-# [打包必填]工程版本
-PROJECT_VERSION=1.0
-
-# [调试必填]调试设备IP地址，在App可以看到
-DEBUG_DEVICE_IP=192.168.31.125
-```
-
-2. 复制yyds.py到你的工程目录
-
-3. 创建入口代码文件**main.py**
-```
-# 导入刚刚复制的封装好的python库, 当然你也可以自己修改定制
-from yyds import *
-```
-
-4. 创建**main**函数
-```python title="工程目录/main.py"
-# 你的python代码从这里开始运行，main函数会被自动调用
-def main():
-    toast("你好，老陈")
-    click(500, 300)
-```
+-----
