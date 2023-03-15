@@ -9,6 +9,7 @@ import funfunc
 from PIL import Image
 
 from yyds import *
+import util
 
 
 def test_output():
@@ -81,12 +82,10 @@ def main():
     main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
     :return:
     """
-    print("=+" * 20)
-    print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), " 开始运行")
-    test_output()
-
+    print("---")
+    util.print_with_time("=+" * 20)
+    util.print_with_time(device_foreground_faster())
     # test_exception()
-
 
     # 点击坐标
     # click(1, 10)

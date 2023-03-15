@@ -279,7 +279,7 @@ class DeviceForegroundResponse:
 def device_foreground() -> Optional[DeviceForegroundResponse]:
     """
     当前设备信息
-    :returns: 当前包名, 当前应用Activity名(有时相对, 有时绝对取决于应用), 应用进程pid
+    :returns: 当前包名, 当前应用Activity名(有时相对, 有时绝对取决于应用), 应用进程 pid
     """
     result = engine_api('/foreground')
     s = result.split(" ")
@@ -288,12 +288,19 @@ def device_foreground() -> Optional[DeviceForegroundResponse]:
     return DeviceForegroundResponse(s[0], s[1], s[2])
 
 
+def device_foreground_faster() -> str:
+    """
+    比device_foreground更快 返回当前活动界面名
+    """
+    return engine_api("/foreground-fast")
+
+
 def is_in_app(pkg: str) -> bool:
     """
     @ 当前是否在某应用界面内
     :param pkg 应用包名
     """
-    return pkg == device_foreground().package
+    return pkg in device_foreground_faster()
 
 
 def device_code():
@@ -400,6 +407,8 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None):
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
 
+
+class Node:
     """
     控件元素
     """

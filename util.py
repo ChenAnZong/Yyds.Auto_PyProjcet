@@ -12,4 +12,4 @@ def print_with_time(*c):
     """
     带时间的打印
     """
-    print(format_time() + " ".join(c))
+    print(format_time() + "\t" + " ".join(c))
