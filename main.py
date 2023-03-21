@@ -84,7 +84,14 @@ def main():
     """
     print("---")
     util.print_with_time("=+" * 20)
-    util.print_with_time(device_foreground_faster())
+    # 获取前台包名
+    util.print_with_time(device_foreground_package())
+    # 获取前台应用界面名
+    util.print_with_time(device_foreground_activity())
+
+    # bring_app_to_top("com.android.browser")
+    util.print_with_time(is_app_running("com.android.browser"))
+
     # test_exception()
 
     # 点击坐标

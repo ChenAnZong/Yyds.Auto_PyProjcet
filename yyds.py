@@ -2,7 +2,7 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数; _开头为内部函数, 一般不对外使用
-@version (36) 3.7
+@version (43) 3.9
 """
 import json
 import yaml
@@ -27,8 +27,114 @@ except:
 DEFAULT_SCREEN_SHOT_PATH = "/sdcard/"
 DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
 CWD = os.getcwd()
-DEBUG_MODE = True
+DEBUG_MODE = False
 GLOBAL_CONFIG = dict()
+
+
+class ResFindImage:
+    """
+    自动化引擎 封装高级查找图片(模版匹配算法)请求参数 所有坐标均为屏幕绝对坐标
+    """
+
+    def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
+        self.name = name  # 传入目标的图片路径参数
+        self.path = path  # 传入目标的图片路径
+        self.min_prob = prob  # 要求最低置信率
+        self.width = width  # 匹配到的图片宽(浮点运算原因, 可能与传入图片的宽相差1像素)
+        self.height = height  # 匹配到的图片高(浮点运算原因, 可能与传入图片的高相差1像素)
+        self.x = x  # 左上角 x
+        self.y = y  # 左上角 y
+
+    @property
+    def cx(self) -> int:
+        return int(self.x + self.width / 2)
+
+    @property
+    def cy(self) -> int:
+        return int(self.y + self.height / 2)
+
+    def __str__(self):
+        return f'ResFindImage {{ name=f"{self.name}", path=f"{self.path}", prob={self.min_prob}, width={self.width}, ' \
+               f'height={self.height}, x={self.x}, y={self.y} }}'
+
+    def __repr__(self):
+        return str(self)
+
+
+class ResYolo:
+    """
+    自动化引擎 封装高级查找图片(Yolo ai算法)返回结果, 所有坐标均为屏幕绝对坐标
+    """
+
+    def __init__(self, label: str, cx: int, cy: int, x: float, y: float, w: float, h: float, prob: float):
+        self.label = label
+        self.cx = cx  # 中间 x
+        self.cy = cy  # 中间 y
+        self.x = x  # 左上角 x
+        self.y = y  # 左上角 y
+        self.w = w  # 宽
+        self.h = h  # 高
+        self.prob = prob  # yolo 识别置信率
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return 'ResYolo {{label="{}", cx={}, cy={}, x={}, y={}, w={}, h={}, prob={} }}'.format(self.label, self.cx,
+                                                                                               self.cy, self.x,
+                                                                                               self.y, self.w, self.h,
+                                                                                               self.prob)
+
+
+class ResOcr:
+    """
+    自动化引擎 封装OCR识别返回结果, 所有坐标均为绝对坐标
+    :param x1
+    """
+
+    def __init__(self, prob: float, text: str, x1: int, y1: int, x2: int, y2: int, x3: int, y3: int,
+                 x4: int, y4: int):
+        self.prob = prob  # OCR识别置信率
+        self.text = text  # OCR识别文本
+        self.x1 = x1  # 左上x
+        self.y1 = y1  # 左上y
+        self.x2 = x2  # 右上x
+        self.y2 = y2  # 右上y
+
+        self.x3 = x3  # 右下x
+        self.y3 = y3  # 右下y
+        self.x4 = x4  # 左下x
+        self.y4 = y4  # 左下y
+
+    # 中间 x
+    @property
+    def cx(self):
+        """
+        中间 x
+        """
+        return int((self.x1 + self.x3) / 2)
+
+    @property
+    def cy(self):
+        """
+        中间 y
+        """
+        return int((self.y1 + self.y3) / 2)
+
+    @property
+    def h(self):
+        return int(self.y3 - self.y2)
+
+    @property
+    def w(self):
+        return int(self.x3 - self.x1)
+
+    def __str__(self):
+        return 'ResOcr# {{ prob={}, text="{}", x1={}, y1={}, x2={}, y2={}, x3={}, y3={}, x4={}, y4={} }}' \
+            .format(self.prob, self.text, self.x1, self.y1, self.x2, self.y2, self.x3, self.y3, self.x4, self.y4)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def current_project() -> str:
@@ -103,7 +209,7 @@ def engine_api(uri: str, options=None):
             params.put(key, str(options[key]))
     ret = EngineApi.http(uri, params)
     if DEBUG_MODE:
-        print(uri, ret)
+        print(uri, options, "=>", ret)
     return ret
 
 
@@ -288,11 +394,32 @@ def device_foreground() -> Optional[DeviceForegroundResponse]:
     return DeviceForegroundResponse(s[0], s[1], s[2])
 
 
-def device_foreground_faster() -> str:
+def device_foreground_activity() -> str:
     """
     比device_foreground更快 返回当前活动界面名
     """
     return engine_api("/foreground-fast")
+
+
+def device_foreground_package() -> str:
+    """
+    比device_foreground更快 返回当前前台包名
+    """
+    return engine_api("/foreground-pkg")
+
+
+def is_app_running(pkg: str) -> bool:
+    """
+    判断app是否在后台运行
+    """
+    return engine_api("/background-is-running", {"pkg": pkg}) == "true"
+
+
+def bring_app_to_top(pkg: str) -> bool:
+    """
+    讲后台运行的应用带回前台
+    """
+    return engine_api("/background-to-top", {"pkg": pkg}) == "true"
 
 
 def is_in_app(pkg: str) -> bool:
@@ -300,7 +427,7 @@ def is_in_app(pkg: str) -> bool:
     @ 当前是否在某应用界面内
     :param pkg 应用包名
     """
-    return pkg in device_foreground_faster()
+    return pkg == device_foreground_package()
 
 
 def device_code():
@@ -598,104 +725,6 @@ class RequestFindImage:
         return str(self)
 
 
-class ResFindImage:
-    """
-    自动化引擎 封装高级查找图片(模版匹配算法)请求参数 所有坐标均为屏幕绝对坐标
-    """
-
-    def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
-        self.name = name  # 传入目标的图片路径参数
-        self.path = path  # 传入目标的图片路径
-        self.min_prob = prob  # 要求最低置信率
-        self.width = width  # 匹配到的图片宽(浮点运算原因, 可能与传入图片的宽相差1像素)
-        self.height = height  # 匹配到的图片高(浮点运算原因, 可能与传入图片的高相差1像素)
-        self.x = x  # 左上角 x
-        self.y = y  # 左上角 y
-
-    @property
-    def cx(self) -> int:
-        return int(self.x + self.width / 2)
-
-    @property
-    def cy(self) -> int:
-        return int(self.y + self.height / 2)
-
-    def __str__(self):
-        return f'ResFindImage {{ name=f"{self.name}", path=f"{self.path}", prob={self.min_prob}, width={self.width}, ' \
-               f'height={self.height}, x={self.x}, y={self.y} }}'
-
-    def __repr__(self):
-        return str(self)
-
-
-class ResYolo:
-    """
-    自动化引擎 封装高级查找图片(Yolo ai算法)返回结果, 所有坐标均为屏幕绝对坐标
-    """
-
-    def __init__(self, label: str, cx: int, cy: int, x: float, y: float, w: float, h: float, prob: float):
-        self.label = label
-        self.cx = cx  # 中间 x
-        self.cy = cy  # 中间 y
-        self.x = x  # 左上角 x
-        self.y = y  # 左上角 y
-        self.w = w  # 宽
-        self.h = h  # 高
-        self.prob = prob  # yolo 识别置信率
-
-    def __repr__(self):
-        return str(self)
-
-    def __str__(self):
-        return 'ResYolo {{label="{}", cx={}, cy={}, x={}, y={}, w={}, h={}, prob={} }}'.format(self.label, self.cx,
-                                                                                               self.cy, self.x,
-                                                                                               self.y, self.w, self.h,
-                                                                                               self.prob)
-
-
-class ResOcr:
-    """
-    自动化引擎 封装OCR识别返回结果, 所有坐标均为绝对坐标
-    :param x1
-    """
-
-    def __init__(self, prob: float, text: str, x1: int, y1: int, x2: int, y2: int, x3: int, y3: int,
-                 x4: int, y4: int):
-        self.prob = prob  # OCR识别置信率
-        self.text = text  # OCR识别文本
-        self.x1 = x1  # 左上x
-        self.y1 = y1  # 左上y
-        self.x2 = x2  # 右上x
-        self.y2 = y2  # 右上y
-
-        self.x3 = x3  # 右下x
-        self.y3 = y3  # 右下y
-        self.x4 = x4  # 左下x
-        self.y4 = y4  # 左下y
-
-    # 中间 x
-    @property
-    def cx(self):
-        """
-        中间 x
-        """
-        return int((self.x1 + self.x3) / 2)
-
-    @property
-    def cy(self):
-        """
-        中间 y
-        """
-        return int((self.y1 + self.y3) / 2)
-
-    def __str__(self):
-        return 'ResOcr# {{ prob={}, text="{}", x1={}, y1={}, x2={}, y2={}, x3={}, y3={}, x4={}, y4={} }}' \
-            .format(self.prob, self.text, self.x1, self.y1, self.x2, self.y2, self.x3, self.y3, self.x4, self.y4)
-
-    def __repr__(self):
-        return self.__str__()
-
-
 def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage, ...]],
                         min_prob: float = 0.5, x=None, y=None, w=None, h=None) \
         -> Tuple[ResFindImage]:
@@ -830,7 +859,7 @@ def screen_ocr_x(specific_texts: Union[list, tuple] = None, x=None, y=None, w=No
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
     :param use_gpu: 是否使用Gpu运算, 性能差的手机不建议, 会导致手机掉帧
-    :param specific_texts 指定查找文本, 若未指定, 则返回整个屏幕的ocr结果, 支持python正则
+    :param specific_texts 指定查找文本, 支持 python正则表达式匹配
     """
     if isinstance(specific_texts, str):
         specific_texts = (specific_texts,)
@@ -839,18 +868,15 @@ def screen_ocr_x(specific_texts: Union[list, tuple] = None, x=None, y=None, w=No
     fd_ocr_str: str = screen_ocr(x=x, y=y, w=w, h=h, use_gpu=use_gpu)
     fd_sp = fd_ocr_str.split('\n')
     results: List[ResOcr] = list()
-    for fd in fd_sp:
-        if fd != "":
-            prob, text, pos_split = fd.split('\t')
-            result = re.match(r'(\d+),(\d+) (\d+),(\d+) (\d+),(\d+) (\d+),(\d+)', pos_split).groups()
-            res = ResOcr(prob, text, int(result[0]), int(result[1]), int(result[2]), int(result[3]),
-                         int(result[4]), int(result[5]), int(result[6]), int(result[7]))
-            if len(specific_texts) > 0:
-                for it in specific_texts:
-                    if re.match(it, res.text):
-                        results.append(res)
-            else:
-                results.append(res)
+    for find_text in specific_texts:
+        for fd in fd_sp:
+            if fd != "":
+                prob, text, pos_split = fd.split('\t')
+                result = re.match(r'(\d+),(\d+) (\d+),(\d+) (\d+),(\d+) (\d+),(\d+)', pos_split).groups()
+                res = ResOcr(prob, text, int(result[0]), int(result[1]), int(result[2]), int(result[3]),
+                             int(result[4]), int(result[5]), int(result[6]), int(result[7]))
+                if re.match(find_text, res.text):
+                    results.append(res)
     return tuple(results)
 
 
