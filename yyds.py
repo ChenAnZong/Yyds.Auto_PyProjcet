@@ -2,7 +2,7 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数; _开头为内部函数, 一般不对外使用
-@version (43) 3.9
+@version (47)
 """
 import json
 import yaml
@@ -27,8 +27,13 @@ except:
 DEFAULT_SCREEN_SHOT_PATH = "/sdcard/"
 DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
 CWD = os.getcwd()
-DEBUG_MODE = False
-GLOBAL_CONFIG = dict()
+_DEBUG_MODE = False
+_GLOBAL_CONFIG = dict()
+
+
+def engine_set_debug(i):
+    global _DEBUG_MODE
+    _DEBUG_MODE = i
 
 
 class ResFindImage:
@@ -208,7 +213,7 @@ def engine_api(uri: str, options=None):
         for key in options.keys():
             params.put(key, str(options[key]))
     ret = EngineApi.http(uri, params)
-    if DEBUG_MODE:
+    if _DEBUG_MODE:
         print(uri, options, "=>", ret)
     return ret
 
@@ -417,7 +422,7 @@ def is_app_running(pkg: str) -> bool:
 
 def bring_app_to_top(pkg: str) -> bool:
     """
-    讲后台运行的应用带回前台
+    将后台运行的应用带回前台
     """
     return engine_api("/background-to-top", {"pkg": pkg}) == "true"
 
@@ -919,11 +924,11 @@ def x_input_clear() -> bool:
 
 
 def _reload_config():
-    global GLOBAL_CONFIG
+    global _GLOBAL_CONFIG
     config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
     try:
         with open(config_path, mode="r") as fr:
-            GLOBAL_CONFIG = json.loads(fr.read())
+            _GLOBAL_CONFIG = json.loads(fr.read())
     except:
         pass
 
@@ -941,12 +946,12 @@ def read_config_value(config_name: str, read_load=False) -> Union[bool, str, int
     :param config_name ui名字
     :param read_load 是否重新读取配置
     """
-    global GLOBAL_CONFIG
-    if config_name in GLOBAL_CONFIG and not read_load:
-        return GLOBAL_CONFIG[config_name]
+    global _GLOBAL_CONFIG
+    if config_name in _GLOBAL_CONFIG and not read_load:
+        return _GLOBAL_CONFIG[config_name]
     _reload_config()
-    if config_name in GLOBAL_CONFIG:
-        return GLOBAL_CONFIG[config_name]
+    if config_name in _GLOBAL_CONFIG:
+        return _GLOBAL_CONFIG[config_name]
     else:
         return None
 
@@ -954,14 +959,14 @@ def read_config_value(config_name: str, read_load=False) -> Union[bool, str, int
 def read_ui_value(config_name: str):
     """
     读取 ui.yml 的 value
-    如果 用户未配置某个值, 你可以读取在ui.yml设置默认值并读取
+    如果 用户未确认配置某值
     """
     if not os.path.exists("ui.yml"):
         return None
     else:
         with open(r"ui.yml", mode="r", encoding="utf-8") as fr:
             c = fr.read()
-            y = yaml.full_load(c)
+            y = yaml.unsafe_load(c)
             return y[config_name]["value"]
 
 
@@ -970,14 +975,58 @@ def write_config_value(config_name: str, value):
     利用代码保存配置
     :param config_name ui名字
     :param value 值
-    
+
     """
-    global GLOBAL_CONFIG
+    global _GLOBAL_CONFIG
     config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
     with open(config_path, mode="w+") as frw:
         try:
-            GLOBAL_CONFIG = json.loads(frw.read())
+            _GLOBAL_CONFIG = json.loads(frw.read())
         except:
             pass
-        GLOBAL_CONFIG[config_name] = value
-        frw.write(json.dumps(GLOBAL_CONFIG, ensure_ascii=False))
+        _GLOBAL_CONFIG[config_name] = value
+        frw.write(json.dumps(_GLOBAL_CONFIG, ensure_ascii=False))
+
+
+def set_yy_input_enable(enable: bool) -> bool:
+    """
+    启用或禁用YY输入法
+    """
+    return engine_api("enable-yy-input", {"enable": "true" if enable else "false"}) == "true"
+
+
+def app_data_backup(pkg: str, path: str) -> bool:
+    """
+    :param pkg 应用包名
+    :param path 备份路径, 备份文件为tar格式
+    备份应用数据
+    """
+    return engine_api("backup-app-data", {"package": pkg, "path": path}) == "true"
+
+
+def app_data_recovery(pkg: str, path: str) -> bool:
+    """
+     :param pkg 应用包名
+    :param path 备份路径, 备份文件为tar格式, 如/sdcard/1.tar.gz
+    还原应用数据
+    """
+    return engine_api("recovery-app-data", {"package": pkg, "path": path}) == "true"
+
+
+def app_apk_backup(pkg: str, path: str) -> bool:
+    """
+    备份apk本身
+    """
+    apk_path = shell(f"pm path {pkg}").replace("package:")
+    if "data" in apk_path:
+        shell(f"cat {apk_path} > {path}")
+        return True
+    else:
+        return False
+
+
+def app_apk_install(path: str):
+    """
+    apk 安装
+    """
+    return "success" in shell(f"pm install {path} && echo success")
