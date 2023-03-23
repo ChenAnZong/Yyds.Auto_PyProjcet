@@ -2,7 +2,7 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数; _开头为内部函数, 一般不对外使用
-@version (47)
+@version (43) 3.9
 """
 import json
 import yaml
@@ -992,7 +992,7 @@ def set_yy_input_enable(enable: bool) -> bool:
     """
     启用或禁用YY输入法
     """
-    return engine_api("enable-yy-input", {"enable": "true" if enable else "false"}) == "true"
+    return engine_api("/enable-yy-input", {"enable": "true" if enable else "false"}) == "true"
 
 
 def app_data_backup(pkg: str, path: str) -> bool:
@@ -1001,7 +1001,7 @@ def app_data_backup(pkg: str, path: str) -> bool:
     :param path 备份路径, 备份文件为tar格式
     备份应用数据
     """
-    return engine_api("backup-app-data", {"package": pkg, "path": path}) == "true"
+    return engine_api("/backup-app-data", {"package": pkg, "path": path}) == "true"
 
 
 def app_data_recovery(pkg: str, path: str) -> bool:
@@ -1010,14 +1010,14 @@ def app_data_recovery(pkg: str, path: str) -> bool:
     :param path 备份路径, 备份文件为tar格式, 如/sdcard/1.tar.gz
     还原应用数据
     """
-    return engine_api("recovery-app-data", {"package": pkg, "path": path}) == "true"
+    return engine_api("/recovery-app-data", {"package": pkg, "path": path}) == "true"
 
 
 def app_apk_backup(pkg: str, path: str) -> bool:
     """
     备份apk本身
     """
-    apk_path = shell(f"pm path {pkg}").replace("package:")
+    apk_path = shell(f"pm path {pkg}").replace("package:", "")
     if "data" in apk_path:
         shell(f"cat {apk_path} > {path}")
         return True
