@@ -44,7 +44,7 @@ class ResFindImage:
     def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
         self.name = name  # 传入目标的图片路径参数
         self.path = path  # 传入目标的图片路径
-        self.min_prob = prob  # 要求最低置信率
+        self.prob = prob  # 要求最低置信率
         self.width = width  # 匹配到的图片宽(浮点运算原因, 可能与传入图片的宽相差1像素)
         self.height = height  # 匹配到的图片高(浮点运算原因, 可能与传入图片的高相差1像素)
         self.x = x  # 左上角 x
@@ -59,7 +59,7 @@ class ResFindImage:
         return int(self.y + self.height / 2)
 
     def __str__(self):
-        return f'ResFindImage {{ name=f"{self.name}", path=f"{self.path}", prob={self.min_prob}, width={self.width}, ' \
+        return f'ResFindImage {{ name=f"{self.name}", path=f"{self.path}", prob={self.prob}, width={self.width}, ' \
                f'height={self.height}, x={self.x}, y={self.y} }}'
 
     def __repr__(self):
@@ -214,7 +214,8 @@ def engine_api(uri: str, options=None):
             params.put(key, str(options[key]))
     ret = EngineApi.http(uri, params)
     if _DEBUG_MODE:
-        print(uri, options, "=>", ret)
+        t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        print(f"{t}:{uri}__{options}___))){ret})))))))\n")
     return ret
 
 
@@ -246,6 +247,8 @@ def click(x: Union[str, int], y: Union[str, int]):
     :param x 屏幕绝对坐标，不支持小数
     :param y 屏幕绝对坐标，不支持小数
     """
+    x += random.randint(-3, 3)
+    y += random.randint(-5, 5)
     engine_api("/touch", {"x": int(x), "y": int(y)})
 
 
@@ -525,7 +528,7 @@ def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
     })
 
 
-def screen_find_image(*img, x=None, y=None, w=None, h=None):
+def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1):
     """
     在屏幕上同时寻找多张图片, 可以指定范围
     :param img 图片路径, 如果传入的是相对路径, 则会被处理成绝对路径
@@ -533,9 +536,10 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None):
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
+    :param threshold threshold > 0 则使用灰度匹配, threshold == 0, 对图片进行反相, threshold > 0, 对图片进行反相并二值化处理(THRESH_BINARY)
     """
     imgs_ = [os.path.join(CWD, i) if os.path.exists(os.path.join(CWD, i)) else i for i in img]
-    args = {"templates": ";".join(imgs_)}
+    args = {"templates": ";".join(imgs_), "threshold": threshold}
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
 
@@ -731,7 +735,7 @@ class RequestFindImage:
 
 
 def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage, ...]],
-                        min_prob: float = 0.5, x=None, y=None, w=None, h=None) \
+                        min_prob: float = 0.5, x=None, y=None, w=None, h=None, threshold: int = -1) \
         -> Tuple[ResFindImage]:
     """
     查看图片
@@ -754,31 +758,34 @@ def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage
     fd_paths: List[str] = list()
     for it in in_list:
         fd_paths.append(it.path)
-    str_fds: str = screen_find_image(*fd_paths, x=x, y=y, w=w, h=h)
+    str_fds: str = screen_find_image(*fd_paths, x=x, y=y, w=w, h=h, threshold=threshold)
     sp_fds = str_fds.split('\n')
     results: List[ResFindImage] = list()
     index = 0
     for fd in sp_fds:
-        if fd != "":
-            it = in_list[index]
-            result = re.match(r'(.*)\t(\d+.\d+) (\d+),(\d+) (\d+),(\d+)', fd).groups()
-            fd_image = ResFindImage(
-                it.name,
-                result[0],
-                float(result[1]),
-                int(result[2]),
-                int(result[3]),
-                int(result[4]),
-                int(result[5])
-            )
-            if fd_image.min_prob >= it.min_prob:
-                results.append(fd_image)
-            index = index + 1
+        try:
+            if fd != "":
+                it = in_list[index]
+                result = re.match(r'(.*)\t(\d+.\d+) (\d+),(\d+) (\d+),(\d+)', fd).groups()
+                fd_image = ResFindImage(
+                    it.name,
+                    result[0],
+                    float(result[1]),
+                    int(result[2]),
+                    int(result[3]),
+                    int(result[4]),
+                    int(result[5])
+                )
+                if fd_image.prob >= it.min_prob:
+                    results.append(fd_image)
+                index = index + 1
+        except:
+            continue
     return tuple(results)
 
 
 def screen_find_image_first_x(fd_images: Tuple[Union[str, RequestFindImage]], min_prob: float = 0.9,
-                              x=None, y=None, w=None, h=None) -> Union[ResFindImage, None]:
+                              x=None, y=None, w=None, h=None, threshold: int = -1) -> Union[ResFindImage, None]:
     """
     # 屏幕查找图片, 仅返回第一张查找结果
 
@@ -789,7 +796,7 @@ def screen_find_image_first_x(fd_images: Tuple[Union[str, RequestFindImage]], mi
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
     """
-    find_images = screen_find_image_x(*fd_images, min_prob=min_prob, x=x, y=y, w=w, h=h)
+    find_images = screen_find_image_x(*fd_images, min_prob=min_prob, x=x, y=y, w=w, h=h, threshold=threshold)
     if len(find_images) > 0:
         return find_images[0]
     return None
@@ -923,7 +930,7 @@ def x_input_clear() -> bool:
     return engine_api("/xinput-clear") == "true"
 
 
-def _reload_config():
+def reload_config():
     global _GLOBAL_CONFIG
     config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
     try:
@@ -949,7 +956,7 @@ def read_config_value(config_name: str, read_load=False) -> Union[bool, str, int
     global _GLOBAL_CONFIG
     if config_name in _GLOBAL_CONFIG and not read_load:
         return _GLOBAL_CONFIG[config_name]
-    _reload_config()
+    reload_config()
     if config_name in _GLOBAL_CONFIG:
         return _GLOBAL_CONFIG[config_name]
     else:
@@ -975,7 +982,7 @@ def write_config_value(config_name: str, value):
     利用代码保存配置
     :param config_name ui名字
     :param value 值
-
+    
     """
     global _GLOBAL_CONFIG
     config_path = f"/sdcard/Yyds.Py/config/{current_project()}.json"
@@ -1025,8 +1032,14 @@ def app_apk_backup(pkg: str, path: str) -> bool:
         return False
 
 
-def app_apk_install(path: str):
+def app_apk_install(path: str) -> bool:
     """
     apk 安装
     """
     return "success" in shell(f"pm install {path} && echo success")
+
+def paste(text: str):
+    """
+    复制文本到粘贴板
+    """
+    engine_api("/paste", {text: text})

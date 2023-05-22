@@ -5,11 +5,10 @@ import threading
 import pickle
 import codecs
 import time
-import funfunc
+import yydsfun
 from PIL import Image
-
-from yyds import *
 import util
+from yydsplus import *
 
 
 def test_output():
@@ -59,8 +58,8 @@ def test_env():
     print("代码工作目录:" + os.getcwd())
     print(f"当前线程: {threading.current_thread().native_id}")
 
-    # 装饰器测试
-    @funfunc.run_no_hurt
+    # 避免这个函数抛异常中断代码
+    @yydsfun.run_no_hurt
     def may_raise_error():
         print("测试装饰器")
         test_exception()
@@ -82,7 +81,11 @@ def main():
     main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
     :return:
     """
-    print("---")
+    # 初始化设备屏幕参数以便使用坐标缩放以及随机性触摸函数
+    init_screen()
+
+    # 往上滑动
+    # swipe_up()
     util.print_with_time("=+" * 20)
     # 获取前台包名
     util.print_with_time(device_foreground_package())
@@ -135,8 +138,34 @@ def main():
     # 设置配置键值
     # write_config_value("edit-user", "陈主任")
 
+    # 寻找所有图片，最小相似度为0.7，如发现则点击
+    find_image_click_max_prob(
+        "ttxcy/开启转盘.jpg",
+        "ttxcy/收下.jpg",
+        "ttxcy/疯狂大转盘.jpg",
+        min_prob=0.7
+    )
+
+    # 发现以下ocr文字则进行点击
+    ocr_click_any("允许", "禁止", "取消安装")
+    # 指定文字搜寻点击
+    ocr_click_if_found("搜全网.*?", w=0.2, h=0.3)
+
+    # 重试10次查找页面1， 间隔3秒，如发现则返回
+    @yydsfun.run_until_true(10, 3)
+    def 等待页面1():
+        if screen_find_image_x("img/111.jpg"):
+            return True
+        else:
+            return False
+
+    # 进入页面1失败，抛出异常中断代码
+    assert 等待页面1
 
     # 打开app
     # open_app("com.coolapk.market")
+
+    # 抛出SystemExit异常，中断代码执行
+    # exit(0)
 
 

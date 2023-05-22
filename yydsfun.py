@@ -53,36 +53,57 @@ def retry_until_true(retry_time=40, interval=1):
     return decorate
 
 
-_ACTIVITY_HANDLER = dict()
+class C:
+    _ACTIVITY_HANDLER = dict()
+    _TASK_HANDLER = dict()
 
 
-def get_activity_handler(name: str):
-    return _ACTIVITY_HANDLER[name]
-
-
-def run_activity_handler(name: str):
+def register_task(*task_name):
     def run(func):
         @wraps(func)
         def run_func(*args, **kwargs):
-            global _ACTIVITY_HANDLER
-            _ACTIVITY_HANDLER[name] = partial(func, *args, **kwargs)
-            cur = device_foreground_activity()
-            if len(cur) < 1:
-                time.sleep(2)
-                cur = device_foreground_activity()
-            if name == cur:
-                print(f"⇛ 执行, 当前界面:{cur}")
-                return _ACTIVITY_HANDLER[name]()
-            else:
-                print(f"⇛ 跳过执行, 期望:{name} 当前界面:{cur}")
-                return None
+            for t in task_name:
+                C._TASK_HANDLER[t] = partial(func, *args, **kwargs)
+            return partial(func, *args, **kwargs)
 
         return run_func()
 
     return run
 
 
-def do(times: int, interval: float, pre_interval=False, *func):
+def handle_task(task_name: str):
+    if task_name in C._TASK_HANDLER:
+        C._TASK_HANDLER[task_name]()
+
+
+def get_activity_handler(name: str):
+    return C._ACTIVITY_HANDLER[name]
+
+
+def run_activity_handler(*names: str):
+    def run(func):
+        @wraps(func)
+        def run_func(*args, **kwargs):
+            cur = device_foreground_activity()
+            for name in names:
+                C._ACTIVITY_HANDLER[name] = partial(func, *args, **kwargs)
+
+                if len(cur) < 1:
+                    time.sleep(2)
+                    cur = device_foreground_activity()
+                if name == cur:
+                    print(f"⇛ 执行, 当前界面:{cur}")
+                    return C._ACTIVITY_HANDLER[name]()
+                else:
+                    print(f"⇛ 跳过执行, 期望:{name} 当前界面:{cur}")
+                    continue
+
+        return run_func()
+
+    return run
+
+
+def do(times: int, interval: float, pre_interval: bool, *func):
     if isinstance(pre_interval, bool) and pre_interval:
         time.sleep(pre_interval)
     for i in range(times):
@@ -95,8 +116,8 @@ def loop_activity_handle(other):
     while True:
         time.sleep(1)
         activity = device_foreground_activity()
-        if activity in _ACTIVITY_HANDLER:
-            _ACTIVITY_HANDLER[activity]()
+        if activity in C._ACTIVITY_HANDLER:
+            C._ACTIVITY_HANDLER[activity]()
         else:
             if other is not None:
                 other()
