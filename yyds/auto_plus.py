@@ -1,6 +1,5 @@
 from .auto_func import *
 from .auto_api_aux import *
-import util
 import time
 
 
@@ -13,7 +12,7 @@ class DeviceScreen:
     def init(cls):
         # 初始化设备参数
         cls._dw, cls._dh = device_get_screen_size()
-        util.log_d(f"当前设备: {device_model()} {DeviceScreen._dw}x{DeviceScreen._dh}")
+        log_d(f"当前设备: {device_model()} {DeviceScreen._dw}x{DeviceScreen._dh}")
 
     @classmethod
     def get_screen_wh(cls):
@@ -46,7 +45,7 @@ def download(url, save_local_path) -> bool:
 
 def toast_print(text):
     toast(text)
-    util.log_d(text)
+    log_d(text)
 
 
 def click_target(t: [ResOcr, ResYolo, ResFindImage]):
@@ -54,7 +53,7 @@ def click_target(t: [ResOcr, ResYolo, ResFindImage]):
 
 
 def sleep(t) -> bool:
-    util.log_d(f"☢☢☢☢ {t}秒")
+    log_d(f"☢☢☢☢ {t}秒")
     time.sleep(t)
     return True
 
@@ -129,10 +128,10 @@ def ocr_click_if_found(*text, x=None, y=None, w=None, h=None, offset_h=None, off
             if offset_h is not None:
                 y = r.cy + offset_h * r.h
             click(x, y)
-        util.log_d(f"- 完成OCR点击[{r.text}]:", text)
+        log_d(f"- 完成OCR点击[{r.text}]:", text)
         return True
     else:
-        # util.log_d(f"- 未执行OCR点击:", text)
+        # log_d(f"- 未执行OCR点击:", text)
         return False
 
 
@@ -153,10 +152,10 @@ def ocr_click_any(*text, x=None, y=None, w=None, h=None, offset_h=None, offset_w
             if offset_h is not None:
                 y = r.cy + offset_h * r.h
             click(x, y)
-        util.log_d(f"- 完成OCR点击[{r.text}]:", text)
+        log_d(f"- 完成OCR点击[{r.text}]:", text)
         return True
     else:
-        # util.log_d(f"- 未执行OCR点击:", text)
+        # log_d(f"- 未执行OCR点击:", text)
         return False
 
 
@@ -174,7 +173,7 @@ def find_image_click(*img, min_prob=0.5, x=None, y=None, w=None, h=None, offset_
         if wait:
             sleep(wait)
         click(x, y)
-        util.log_d(f"█ 图片点击 █ {r[-1]} -> {x},{y}")
+        log_d(f"█ 图片点击 █ {r[-1]} -> {x},{y}")
         return True
     else:
         return False
@@ -213,18 +212,18 @@ def open_app_from_desktop(app_name: str, pkg_name: str, img: str):
     # 翻动最多4页找到图标
     for _ in range(5):
         sleep(1)
-        util.log_d(f"寻找[{app_name}]图标")
+        log_d(f"寻找[{app_name}]图标")
         t = screen_find_image_x((img,), min_prob=0.75, threshold=0)
         if t:
-            util.log_d("找到图标, 进行点击")
+            log_d("找到图标, 进行点击")
             click_target(t[0])
             sleep(3)
             if device_foreground_package() == pkg_name:
-                util.log_d("进入应用成功!")
+                log_d("进入应用成功!")
                 return True
         else:
             swipe_left()
-    util.log_d(f"进入应用[{app_name}]失败!")
+    log_d(f"进入应用[{app_name}]失败!")
     return False
 
 
@@ -258,7 +257,7 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
 
     if len(r) > 0:
         sleep(1.5)
-        util.log_d("@1再次确认检测目标")
+        log_d("@1再次确认检测目标")
         r = screen_find_image_x(tuple(input_images), min_prob=min_prob,
                                 x=x, y=y, w=w, h=h, threshold=threshold)
 
@@ -270,9 +269,9 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
             img_res.sort(key=lambda rf: rf.prob, reverse=True)
         is_found_must_click = False
         for img_res_single in img_res:
-            util.log_d(f"█ 返回结果:" + str(img_res_single))
+            log_d(f"█ 返回结果:" + str(img_res_single))
             if img_res_single.name in must_click:
-                util.log_d(f"█ 发现必点图片: {img_res_single}")
+                log_d(f"█ 发现必点图片: {img_res_single}")
                 if img_res_single.name in image_sleep:
                     sleep(image_sleep[img_res_single.name])
                 if img_res_single.name in click_time:
@@ -294,7 +293,7 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
                 click_target(best_img)
         else:
             click_target(best_img)
-        util.log_d(f"█ 最大可能性图片点击 █ {best_img} -> {best_img.cx},{best_img.cy}")
+        log_d(f"█ 最大可能性图片点击 █ {best_img} -> {best_img.cx},{best_img.cy}")
         return True
     else:
         return False

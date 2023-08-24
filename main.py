@@ -14,6 +14,7 @@ import time
 import colorsys
 from PIL import Image
 
+
 from yyds import *
 
 
@@ -90,14 +91,14 @@ def main_():
 
     # 往上滑动
     # swipe_up()
-    util.log_d("=+" * 20)
+    log_d("=+" * 20)
     # 获取前台包名
-    util.log_d(device_foreground_package())
+    log_d(device_foreground_package())
     # 获取前台应用界面名
-    util.log_d(device_foreground_activity())
+    log_d(device_foreground_activity())
 
     # bring_app_to_top("com.android.browser")
-    util.log_d(is_app_running("com.android.browser"))
+    log_d(is_app_running("com.android.browser"))
 
     # test_exception()
 
@@ -175,17 +176,17 @@ def main_():
 
 def main():
     engine_set_debug(True)
-    log_d("===开始脚本执行!")
-    # util.log_d("获取坐标颜色:", get_color(979, 611))
+    log_d("===开始脚本执行! 以下是对79版本对图色类函数测试")
+    # log_d("获取坐标颜色:", get_color(979, 611))
     # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
-    # util.log_d("颜色查找:", find_color("33,146,38", max_fuzzy=5, y=.2, x=.7, max_counts=6, step_y=80))
+    log_d("颜色查找:", find_color("33,146,38", max_fuzzy=10, y=.2, x=.7, max_counts=6, step_y=80))
 
-    # util.log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
-    log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
+    # log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
+    # log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
 
-    # util.log_d("多点找色1:",
+    # log_d("多点找色1:",
     #            find_color("7,203,117"))
-    # util.log_d("多点找色2:",
+    # log_d("多点找色2:",
     #            find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
 
 

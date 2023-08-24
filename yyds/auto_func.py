@@ -2,7 +2,6 @@ import traceback
 import time
 from functools import wraps, partial
 from .auto_api_aux import device_foreground_activity
-from .util import log_d
 
 
 class WrapRecord:
@@ -31,6 +30,7 @@ def run(func):
     """
     装饰器 直接运行定义的函数
     """
+
     @wraps(func)
     def run_func(*args, **kwargs):
         return func(*args, **kwargs)
@@ -42,6 +42,7 @@ def run_no_hurt(func):
     """
     装饰器 直接运行定义的函数, 并捕抓其运行异常
     """
+
     @wraps(func)
     def run_func(*args, **kwargs):
         return func(*args, **kwargs)
@@ -58,6 +59,7 @@ def retry_until_true(retry_time=40, interval=1):
     装饰器 循环运行定义的函数, 最大尝试`retry_time`次, 间隔`interval`秒,
     若在循环过程中, 函数返回结果为真, 则提前终止循环
     """
+
     def decorate(func):
         rc = 0
         run_result = False
@@ -82,6 +84,7 @@ def register_task(*task_name):
     把一个函数当作一个任务
     装饰器 注册任务
     """
+
     def run(func):
         @wraps(func)
         def run_func(*args, **kwargs):
@@ -115,6 +118,7 @@ def run_activity_handler(*names: str):
     :param names 注册的活动名, 可变参数, 即可同时注册多个
     判断当前设备活动名是否为注册的活动名, 如果是, 则执行任务, 如果不是, 则打印日志
     """
+
     def run(func):
         @wraps(func)
         def run_func(*args, **kwargs):

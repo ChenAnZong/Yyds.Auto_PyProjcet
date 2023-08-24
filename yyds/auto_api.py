@@ -12,6 +12,8 @@ import hashlib
 import importlib
 from typing import Union, Tuple, List, Optional
 from .auto_entity import *
+from .util import log_d
+from .util import log_e
 
 
 class ProjectEnvironment:
@@ -432,7 +434,7 @@ def find_color(base_rgb: str, bias_points: [str] = [], max_fuzzy: int = 3, step_
         result: [] = []
         for line in engine_ret.split("\n"):
             if len(line) > 4:
-                result.append(EngineResultParser.parse_point_from_str(line))
+                result.append(EngineResultParser.parse_point(line))
         return result
 
 
@@ -449,7 +451,7 @@ def get_color(x: int, y: int, image=None) -> Color:
         args["image"] = __handle_image_path(image)
     args["x"] = x
     args["y"] = y
-    return EngineResultParser.parse_color_from_str(engine_api("/get-color", args))
+    return EngineResultParser.parse_color(engine_api("/get-color", args))
 
 
 def ensure_kernel_click():
