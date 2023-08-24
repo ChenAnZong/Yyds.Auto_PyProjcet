@@ -1,43 +1,52 @@
-import codecs
-from functools import partial
-import yydsfun
-from yydskernel import *
+from .auto_func import *
+from .auto_api_aux import *
 import util
 import time
 
 
-class screen:
+class DeviceScreen:
     # 屏幕宽高
     _dw: int = 1080
     _dh: int = 2400
 
+    @classmethod
+    def init(cls):
+        # 初始化设备参数
+        cls._dw, cls._dh = device_get_screen_size()
+        util.log_d(f"当前设备: {device_model()} {DeviceScreen._dw}x{DeviceScreen._dh}")
+
+    @classmethod
+    def get_screen_wh(cls):
+        return cls._dw, cls._dh
+
+    @classmethod
+    def get_h(cls):
+        return cls._dh
+
+    @classmethod
+    def get_w(cls):
+        return cls._dw
+
+
+def download(url, save_local_path) -> bool:
+    """
+    http网络文件下载
+    :param url 下载url
+    :param save_local_path 本地保存路径
+    :returns: 是否下载成功
+    """
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open(save_local_path, 'wb+') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+            return True
+    return False
+
 
 def toast_print(text):
     toast(text)
-    util.print_with_time(text)
-
-
-def init_screen():
-    # 初始化设备参数
-    screen._dw, screen._dh = device_get_screen_size()
-    util.print_with_time(f"当前设备: {device_model()} {screen._dw}x{screen._dh}")
-
-
-def get_screen_wh():
-    return screen._dw, screen._dh
-
-
-def get_h():
-    return screen._dh
-
-
-def get_w():
-    return screen._dw
-
-
-def is_top_x(y):
-    print(f"判断是否上面的X", y, get_h()*0.15, y < get_h()*0.15)
-    return y < get_h() * 0.15
+    util.log_d(text)
 
 
 def click_target(t: [ResOcr, ResYolo, ResFindImage]):
@@ -45,7 +54,7 @@ def click_target(t: [ResOcr, ResYolo, ResFindImage]):
 
 
 def sleep(t) -> bool:
-    util.print_with_time(f"☢☢☢☢ {t}秒")
+    util.log_d(f"☢☢☢☢ {t}秒")
     time.sleep(t)
     return True
 
@@ -60,37 +69,47 @@ def random_sleep(a, b):
 
 
 def swipe_up():
-    swipe(random.randint(int(screen._dw * 0.5), int(screen._dw * 0.55)), random.randint(int(screen._dh * 0.75), int(screen._dh * 0.8)),
-          random.randint(int(screen._dw * 0.5), int(screen._dw * 0.55)), random.randint(int(screen._dh * 0.2), int(screen._dh * .3)),
+    swipe(random.randint(int(DeviceScreen._dw * 0.5), int(DeviceScreen._dw * 0.55)),
+          random.randint(int(DeviceScreen._dh * 0.75), int(DeviceScreen._dh * 0.8)),
+          random.randint(int(DeviceScreen._dw * 0.5), int(DeviceScreen._dw * 0.55)),
+          random.randint(int(DeviceScreen._dh * 0.2), int(DeviceScreen._dh * .3)),
           random.randint(1200, 1500))
 
 
 def swipe_down():
-    swipe(random.randint(int(screen._dw * 0.4), int(screen._dw * 0.6)), random.randint(int(screen._dh * 0.2), int(screen._dh * 0.3)),
-          random.randint(int(screen._dw * 0.4), int(screen._dw * 0.6)), random.randint(int(screen._dh * 0.75), int(screen._dh * 0.9)),
+    swipe(random.randint(int(DeviceScreen._dw * 0.4), int(DeviceScreen._dw * 0.6)),
+          random.randint(int(DeviceScreen._dh * 0.2), int(DeviceScreen._dh * 0.3)),
+          random.randint(int(DeviceScreen._dw * 0.4), int(DeviceScreen._dw * 0.6)),
+          random.randint(int(DeviceScreen._dh * 0.75), int(DeviceScreen._dh * 0.9)),
           random.randint(300, 800))
 
 
 def swipe_right():
-    swipe(random.randint(int(screen._dw * 0.2), int(screen._dw * 0.3)), random.randint(int(screen._dh * 0.6), int(screen._dh * 0.7)),
-          random.randint(int(screen._dw * 0.75), int(screen._dw * 0.9)), random.randint(int(screen._dh * 0.6), int(screen._dh * 0.7)),
+    swipe(random.randint(int(DeviceScreen._dw * 0.2), int(DeviceScreen._dw * 0.3)),
+          random.randint(int(DeviceScreen._dh * 0.6), int(DeviceScreen._dh * 0.7)),
+          random.randint(int(DeviceScreen._dw * 0.75), int(DeviceScreen._dw * 0.9)),
+          random.randint(int(DeviceScreen._dh * 0.6), int(DeviceScreen._dh * 0.7)),
           random.randint(200, 600))
 
 
 def swipe_left():
-    swipe(random.randint(int(screen._dw * 0.75), int(screen._dw * 0.9)), random.randint(int(screen._dh * 0.6), int(screen._dh * 0.7)),
-          random.randint(int(screen._dw * 0.2), int(screen._dw * 0.3)), random.randint(int(screen._dh * 0.6), int(screen._dh * 0.7)),
+    swipe(random.randint(int(DeviceScreen._dw * 0.75), int(DeviceScreen._dw * 0.9)),
+          random.randint(int(DeviceScreen._dh * 0.6), int(DeviceScreen._dh * 0.7)),
+          random.randint(int(DeviceScreen._dw * 0.2), int(DeviceScreen._dw * 0.3)),
+          random.randint(int(DeviceScreen._dh * 0.6), int(DeviceScreen._dh * 0.7)),
           random.randint(200, 600))
 
 
 def swipe_left_top():
-    swipe(random.randint(int(screen._dw * 0.85), int(screen._dw * 0.95)), random.randint(int(screen._dh * 0.3), int(screen._dh * 0.35)),
-          random.randint(int(screen._dw * 0.1), int(screen._dw * 0.2)), random.randint(int(screen._dh * 0.3), int(screen._dh * 0.35)),
+    swipe(random.randint(int(DeviceScreen._dw * 0.85), int(DeviceScreen._dw * 0.95)),
+          random.randint(int(DeviceScreen._dh * 0.3), int(DeviceScreen._dh * 0.35)),
+          random.randint(int(DeviceScreen._dw * 0.1), int(DeviceScreen._dw * 0.2)),
+          random.randint(int(DeviceScreen._dh * 0.3), int(DeviceScreen._dh * 0.35)),
           random.randint(200, 600))
 
 
 def scal_pos_1080_2400(x, y) -> (int, int):
-    return int(screen._dw * x / 1080), int(screen._dh * y / 2400)
+    return int(DeviceScreen._dw * x / 1080), int(DeviceScreen._dh * y / 2400)
 
 
 def ocr_click_if_found(*text, x=None, y=None, w=None, h=None, offset_h=None, offset_w=None) -> bool:
@@ -110,10 +129,10 @@ def ocr_click_if_found(*text, x=None, y=None, w=None, h=None, offset_h=None, off
             if offset_h is not None:
                 y = r.cy + offset_h * r.h
             click(x, y)
-        util.print_with_time(f"- 完成OCR点击[{r.text}]:", text)
+        util.log_d(f"- 完成OCR点击[{r.text}]:", text)
         return True
     else:
-        # util.print_with_time(f"- 未执行OCR点击:", text)
+        # util.log_d(f"- 未执行OCR点击:", text)
         return False
 
 
@@ -134,10 +153,10 @@ def ocr_click_any(*text, x=None, y=None, w=None, h=None, offset_h=None, offset_w
             if offset_h is not None:
                 y = r.cy + offset_h * r.h
             click(x, y)
-        util.print_with_time(f"- 完成OCR点击[{r.text}]:", text)
+        util.log_d(f"- 完成OCR点击[{r.text}]:", text)
         return True
     else:
-        # util.print_with_time(f"- 未执行OCR点击:", text)
+        # util.log_d(f"- 未执行OCR点击:", text)
         return False
 
 
@@ -149,13 +168,13 @@ def find_image_click(*img, min_prob=0.5, x=None, y=None, w=None, h=None, offset_
         x = last.cx
         y = last.cy
         if offset_x is not None:
-            x = x + screen._dw * offset_x
+            x = x + DeviceScreen._dw * offset_x
         if offset_y is not None:
-            y = y + screen._dh * offset_y
+            y = y + DeviceScreen._dh * offset_y
         if wait:
             sleep(wait)
         click(x, y)
-        util.print_with_time(f"█ 图片点击 █ {r[-1]} -> {x},{y}")
+        util.log_d(f"█ 图片点击 █ {r[-1]} -> {x},{y}")
         return True
     else:
         return False
@@ -186,23 +205,26 @@ def set_text(text):
 
 
 def open_app_from_desktop(app_name: str, pkg_name: str, img: str):
+    """
+    该函数模拟器从手机桌面点开应用
+    """
     # 滑回到主页
-    yydsfun.do(2, 1.5, False, key_home)
+    do(2, 1.5, False, key_home)
     # 翻动最多4页找到图标
     for _ in range(5):
         sleep(1)
-        util.print_with_time(f"寻找[{app_name}]图标")
+        util.log_d(f"寻找[{app_name}]图标")
         t = screen_find_image_x((img,), min_prob=0.75, threshold=0)
         if t:
-            util.print_with_time("找到图标, 进行点击")
+            util.log_d("找到图标, 进行点击")
             click_target(t[0])
             sleep(3)
             if device_foreground_package() == pkg_name:
-                util.print_with_time("进入应用成功!")
+                util.log_d("进入应用成功!")
                 return True
         else:
             swipe_left()
-    util.print_with_time(f"进入应用[{app_name}]失败!")
+    util.log_d(f"进入应用[{app_name}]失败!")
     return False
 
 
@@ -210,6 +232,7 @@ def exit_go_home():
     toast_print("☃运行时间到了")
     key_home()
     exit(0)
+
 
 def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None, is_random_click=False,
                               threshold: int = -1) -> bool:
@@ -235,9 +258,9 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
 
     if len(r) > 0:
         sleep(1.5)
-        util.print_with_time("@1再次确认检测目标")
+        util.log_d("@1再次确认检测目标")
         r = screen_find_image_x(tuple(input_images), min_prob=min_prob,
-                            x=x, y=y, w=w, h=h, threshold=threshold)
+                                x=x, y=y, w=w, h=h, threshold=threshold)
 
     if len(r) > 0:
         img_res = list(r)
@@ -247,9 +270,9 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
             img_res.sort(key=lambda rf: rf.prob, reverse=True)
         is_found_must_click = False
         for img_res_single in img_res:
-            util.print_with_time(f"█ 返回结果:" + str(img_res_single))
+            util.log_d(f"█ 返回结果:" + str(img_res_single))
             if img_res_single.name in must_click:
-                util.print_with_time(f"█ 发现必点图片: {img_res_single}")
+                util.log_d(f"█ 发现必点图片: {img_res_single}")
                 if img_res_single.name in image_sleep:
                     sleep(image_sleep[img_res_single.name])
                 if img_res_single.name in click_time:
@@ -271,7 +294,7 @@ def find_image_click_max_prob(*img, min_prob=0.5, x=None, y=None, w=None, h=None
                 click_target(best_img)
         else:
             click_target(best_img)
-        util.print_with_time(f"█ 最大可能性图片点击 █ {best_img} -> {best_img.cx},{best_img.cy}")
+        util.log_d(f"█ 最大可能性图片点击 █ {best_img} -> {best_img.cx},{best_img.cy}")
         return True
     else:
         return False

@@ -1,3 +1,9 @@
+"""
+@author  玩机达人 微信:wjzy_yyds
+@desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
+@tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
+@version 对应 Yyds.Auto 版本: 78(5.2)
+"""
 import os
 import json
 import sys
@@ -5,10 +11,10 @@ import threading
 import pickle
 import codecs
 import time
-import yydsfun
+import colorsys
 from PIL import Image
-import util
-from yydsplus import *
+
+from yyds import *
 
 
 def test_output():
@@ -59,7 +65,7 @@ def test_env():
     print(f"当前线程: {threading.current_thread().native_id}")
 
     # 避免这个函数抛异常中断代码
-    @yydsfun.run_no_hurt
+    @run_no_hurt
     def may_raise_error():
         print("测试装饰器")
         test_exception()
@@ -72,28 +78,26 @@ def test_input_search():
     """
     比如在今日头条输入并搜索 "你好坏啊, 我好喜欢"
     """
+    # 一般来说, 我们使用输入法输入文字到编辑框的时候, 应当先清理当前编辑框文本, 以符合输入预期, 否则在已经有的内容后面追加输入
+    x_input_clear()
     x_input_text("你好坏啊, 我好喜欢")
     key_confirm()
 
 
-def main():
-    """
-    main 函数为入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
-    :return:
-    """
+def main_():
     # 初始化设备屏幕参数以便使用坐标缩放以及随机性触摸函数
-    init_screen()
+    DeviceScreen.init()
 
     # 往上滑动
     # swipe_up()
-    util.print_with_time("=+" * 20)
+    util.log_d("=+" * 20)
     # 获取前台包名
-    util.print_with_time(device_foreground_package())
+    util.log_d(device_foreground_package())
     # 获取前台应用界面名
-    util.print_with_time(device_foreground_activity())
+    util.log_d(device_foreground_activity())
 
     # bring_app_to_top("com.android.browser")
-    util.print_with_time(is_app_running("com.android.browser"))
+    util.log_d(is_app_running("com.android.browser"))
 
     # test_exception()
 
@@ -110,7 +114,7 @@ def main():
     # print(ui_match(resource_id="com.miui.home:id/clearAnimView"))
 
     # 指定区域进行 OCR 识别, 使用 gpu 进行运算识别, 屏幕从左到右300像素开始进行识别
-    # print(screen_ocr(x=300, use_gpu=True))
+    # print(ocr(x=300, use_gpu=True))
 
     # 指定区域 OCR, 查找指定文字
     # print(screen_ocr_x(list("酷安"), y=0.1, h=400))
@@ -152,7 +156,7 @@ def main():
     ocr_click_if_found("搜全网.*?", w=0.2, h=0.3)
 
     # 重试10次查找页面1， 间隔3秒，如发现则返回
-    @yydsfun.run_until_true(10, 3)
+    @run_until_true(10, 3)
     def 等待页面1():
         if screen_find_image_x("img/111.jpg"):
             return True
@@ -169,3 +173,23 @@ def main():
     # exit(0)
 
 
+def main():
+    engine_set_debug(True)
+    log_d("===开始脚本执行!")
+    # util.log_d("获取坐标颜色:", get_color(979, 611))
+    # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
+    # util.log_d("颜色查找:", find_color("33,146,38", max_fuzzy=5, y=.2, x=.7, max_counts=6, step_y=80))
+
+    # util.log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
+    log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
+
+    # util.log_d("多点找色1:",
+    #            find_color("7,203,117"))
+    # util.log_d("多点找色2:",
+    #            find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
+
+
+"""
+1. main 函数为Yyds.Auto工程的入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
+2.如果代码有BUG 请联系作者24小时内处理解决
+"""
