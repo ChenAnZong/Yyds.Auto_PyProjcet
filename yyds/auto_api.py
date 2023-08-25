@@ -43,7 +43,7 @@ class ProjectEnvironment:
 class Config:
     """
     可视作一个小型的配置存储类, 并与设备的ui的配置共享同一个存储位置
-    如需读写大量数据, 请使用 `sqlite`
+    所有配置序列化为将配置保存为json格式, 如需读写大量数据, 请使用 👉`sqlite`
     """
     config_path = f"/sdcard/Yyds.Py/config/{ProjectEnvironment.current_project()}.json"
 
@@ -68,6 +68,8 @@ class Config:
         如果不存在config_name或config_name不可配置, 则返回 None
         :param config_name ui名字
         :param read_load 是否重新读取配置
+
+        :return ⚠️如果用户为未到ui界面进行配置, 则返回None, 脚本设置需要判断并设置某些默认的值
         """
         # 每次读取前进行刷新
         if config_name in ProjectEnvironment.GLOBAL_CONFIG and not read_load:
@@ -78,23 +80,9 @@ class Config:
             return None
 
     @classmethod
-    def read_ui_value(cls, config_name: str):
-        """
-        读取 ui.yml 的 value
-        如果 用户未确认配置某值
-        """
-        if not os.path.exists("ui.yml"):
-            return None
-        else:
-            with open(r"ui.yml", mode="r", encoding="utf-8") as fr:
-                c = fr.read()
-                y = yaml.unsafe_load(c)
-                return y[config_name]["value"]
-
-    @classmethod
     def write_config_value(cls, config_name: str, value):
         """
-        利用代码保存配置 一般不用这个
+        利用代码保存配置 (少用)
         :param config_name ui名字
         :param value 值
         """
@@ -105,6 +93,19 @@ class Config:
                 pass
             ProjectEnvironment.GLOBAL_CONFIG[config_name] = value
             frw.write(json.dumps(ProjectEnvironment.GLOBAL_CONFIG, ensure_ascii=False))
+
+    @classmethod
+    def read_ui_value(cls, config_name: str):
+        """
+        直接从工程目录下的 ui.yml 文件读取 value, 利用这个读取函数, 我们可以在ui.yml中配置默认值
+        """
+        if not os.path.exists("ui.yml"):
+            return None
+        else:
+            with open(r"ui.yml", mode="r", encoding="utf-8") as fr:
+                c = fr.read()
+                y = yaml.unsafe_load(c)
+                return y[config_name]["value"]
 
 
 class EngineDebug:
@@ -330,6 +331,7 @@ def ocr(image=None, x=None, y=None, w=None, h=None, use_gpu=False) -> str:
         args["path"] = image_path
         return engine_api("/image-ocr", args)
 
+
 def screen_yolo_locate(x=None, y=None, w=None, h=None, use_gpu=True) -> str:
     """
     [底层接口] 底层接口 使用yolo查找目标
@@ -440,10 +442,11 @@ def find_color(base_rgb: str, bias_points: [str] = [], max_fuzzy: int = 3, step_
 
 def get_color(x: int, y: int, image=None) -> Color:
     """
+    获取图片指定坐标的颜色
     :param x 整数坐标, 应少于等于目标图像的宽
     :param y 整数坐标, 应少于等于目标图像的高
     :param image 如image == None, 则进行截图作为识别图片
-    :returns: 颜色RGB字符串 如:125,200,200 数字依次代表红,绿,蓝颜色的分量
+    :returns: RGB颜色
     """
 
     args = dict()
@@ -452,6 +455,20 @@ def get_color(x: int, y: int, image=None) -> Color:
     args["x"] = x
     args["y"] = y
     return EngineResultParser.parse_color(engine_api("/get-color", args))
+
+
+def get_multi_color(points: [(int, int)], image=None) -> (Color,):
+    """
+    获取图片多个坐标的颜色 V80版本新增
+    :param points 如[(100, 255), [45, 588]], 则依次返回坐标100,255以及坐标45, 588的坐标颜色
+    :param image 如image == None, 则进行截图作为识别图片
+    :returns: RGB颜色数组
+    """
+    args = dict()
+    if image is not None:
+        args["image"] = __handle_image_path(image)
+    args["points"] = " ".join([f"{x},{y}" for x, y in points])
+    return EngineResultParser.parse_multi_color(engine_api("/get-color", args))
 
 
 def ensure_kernel_click():

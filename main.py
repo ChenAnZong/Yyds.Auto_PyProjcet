@@ -14,7 +14,6 @@ import time
 import colorsys
 from PIL import Image
 
-
 from yyds import *
 
 
@@ -128,10 +127,10 @@ def main_():
     # key_menu()
 
     # 获取用户的配置键值
-    # print(read_config_value("select-1"))
+    # print(Config.read_config_value("select-1"))
 
     # 读取ui.yml的值, 注意select返回为数组
-    # print(read_ui_value("select-1"))
+    # print(Config.read_ui_value("select-1"))
 
     # print(ui_match(resource_id="com.wj.play:id/image_icon_con"))
     # 如果 ui没有改变, 则可以从缓存匹配, 加快匹配速度
@@ -141,7 +140,7 @@ def main_():
     # print(ui_match(resource_id="com.wj.play:id/image_icon_con")[0].center_point)
 
     # 设置配置键值
-    # write_config_value("edit-user", "陈主任")
+    # Config.write_config_value("edit-user", "陈主任")
 
     # 寻找所有图片，最小相似度为0.7，如发现则点击
     find_image_click_max_prob(
@@ -181,13 +180,13 @@ def main():
     # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
     log_d("颜色查找:", find_color("33,146,38", max_fuzzy=10, y=.2, x=.7, max_counts=6, step_y=80))
 
-    # log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
-    # log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
+    log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
+    log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
 
-    # log_d("多点找色1:",
-    #            find_color("7,203,117"))
-    # log_d("多点找色2:",
-    #            find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
+    log_d("多点找色1:",
+          find_color("7,203,117"))
+    log_d("多点找色2:",
+          find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
 
 
 """

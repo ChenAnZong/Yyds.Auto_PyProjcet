@@ -270,6 +270,19 @@ class EngineResultParser:
         return Color(int(rgb_split[0]), int(rgb_split[1]), int(rgb_split[2]))
 
     @staticmethod
+    def parse_multi_color(rgb_text: str) -> (Color, ):
+        """
+        从以空格为分隔的多个颜色中解析获取实例数组
+        """
+        line_split = rgb_text.split(" ")
+        ret = []
+        for line in line_split:
+            if len(line) > 4:
+                rgb_split = line.split(",")
+                ret.append(Color(int(rgb_split[0]), int(rgb_split[1]), int(rgb_split[2])))
+        return tuple(ret)
+
+    @staticmethod
     def parse_point(text: str) -> Point:
         """
         解析引擎的坐标字符串
