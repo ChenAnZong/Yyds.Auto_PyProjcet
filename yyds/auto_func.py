@@ -1,7 +1,7 @@
 import traceback
 import time
 from functools import wraps, partial
-from .auto_api_aux import device_foreground_activity
+from .auto_plus import *
 
 
 class WrapRecord:
