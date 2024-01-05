@@ -175,18 +175,19 @@ def main_():
 
 def main():
     engine_set_debug(True)
-    log_d("===开始脚本执行! 以下是对79版本对图色类函数测试")
-    log_d("获取坐标颜色:", get_color(979, 611))
-    # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
-    log_d("颜色查找:", find_color("33,146,38", max_fuzzy=10, y=.2, x=.7, max_counts=6, step_y=80))
-    if os.path.exists("/sdcard/1.jpg") and os.path.exists("/sdcard/2.jpg"):
-        log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
-    log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
-
-    log_d("多点找色1:",
-          find_color("7,203,117"))
-    log_d("多点找色2:",
-          find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
+    log_d("===开始脚本执行! ")
+    # log_d("获取坐标颜色:", get_color(979, 611))
+    # # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
+    # log_d("颜色查找:", find_color("33,146,38", max_fuzzy=10, y=.2, x=.7, max_counts=6, step_y=80))
+    # if os.path.exists("/sdcard/1.jpg") and os.path.exists("/sdcard/2.jpg"):
+    #     log_d("图片相似度:", image_similarity("/sdcard/1.jpg", "/sdcard/2.jpg"))
+    # log_d("图片多次匹配:", match_images(template_image="img/gou.jpg", threshold=0, prob=0.8))
+    #
+    # log_d("多点找色1:",
+    #       find_color("7,203,117"))
+    # log_d("多点找色2:",
+    #       find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
+    log_d("获取到粘贴版文本:" + get_clipboard())
 
 
 """

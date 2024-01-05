@@ -500,3 +500,10 @@ def paste(text: str):
     复制文本到粘贴板, 在高级的安卓版本可能被受到限制, 注意自行测试
     """
     engine_api("/paste", {text: text})
+
+
+def get_clipboard():
+    """
+    获取粘贴板文本, 在安卓9以上被限制, 需要启用YY输入法进行获取
+    """
+    return engine_api("/clipboard-text", {})
