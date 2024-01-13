@@ -10,7 +10,7 @@ def click_double(x: Union[str, int], y: Union[str, int]):
     click(x, y)
 
 
-def swipe(x1, y1, x2, y2, duration):
+def swipe(x1, y1, x2, y2, duration, is_random: bool = False):
     """
     滑动
     :param x1 起始坐标 x
@@ -18,9 +18,10 @@ def swipe(x1, y1, x2, y2, duration):
     :param x2 目标坐标 x
     :param y2 目标坐标 y
     :param duration 滑动耗时（毫秒） 越小滑动越快
+    :param is_random 是否随机进行滑动(会画出一条锯齿一样的线, 而不是纯直线)
     """
     engine_api("/swipe", {"x1": int(x1), "x2": int(x2),
-                          "y1": int(y1), "y2": int(y2), "duration": int(duration)})
+                          "y1": int(y1), "y2": int(y2), "duration": int(duration), "random": is_random})
 
 
 def key_back():

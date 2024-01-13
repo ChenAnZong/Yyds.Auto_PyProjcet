@@ -2,7 +2,7 @@
 @author  玩机达人 微信:wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
-@version 对应 Yyds.Auto 版本: 78(5.2)
+@version 对应 Yyds.Auto 版本: 89(5.42)
 """
 import os
 import json
@@ -188,6 +188,7 @@ def main():
     # log_d("多点找色2:",
     #       find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
     log_d("获取到粘贴版文本:" + get_clipboard())
+    toast("运行完毕")
 
 
 """
