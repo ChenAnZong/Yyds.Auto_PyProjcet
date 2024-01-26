@@ -235,7 +235,7 @@ def engine_api(uri: str, options=None) -> str:
         for key in options.keys():
             params.put(key, str(options[key]))
     ret = EngineApi.http(uri, params)
-    if ProjectEnvironment.DEBUG_MODE:
+    if ProjectEnvironment._DEBUG_MODE:
         t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"{t}:{uri}__{options}___))){ret})))))))\n")
     return ret
@@ -351,10 +351,10 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1)
     """
     [底层接口] 在屏幕上同时寻找多张图片, 可以指定范围
     :param img 图片路径, 如果传入的是相对路径, 则会被处理成绝对路径
-    :param x: 识别起始点 可以使用相对坐标(0-1)
-    :param y: 识别起始点 可以使用相对坐标(0-1)
-    :param w: 宽 可以使用相对坐标(0-1)
-    :param h: 高 可以使用相对坐标(0-1)
+    :param x: 识别起始点 可以使用相对坐标(0-1)或绝对像素值, 可以想象是从屏幕左边拉条线出来, 线左边区域不要去查找
+    :param y: 识别起始点 可以使用相对坐标(0-1)或绝对像素值, 可以想象是从屏幕顶部拉条线出来, 线以上区域不要去查找
+    :param w: 宽 可以使用相对坐标(0-1)或绝对像素值, 从左边起始初区域延伸多长距离, 如为空, 则查找到屏幕右边
+    :param h: 高 可以使用相对坐标(0-1)或绝对像素值, 从顶部起始区域域延伸多长距离, 如为空, 则查找到屏幕底部
     :param threshold
         threshold < 0   则图片保持彩色查找匹配(转换到luv颜色空间), threshold的取值在该范围下无意义
         threshold == 0  对图片进行灰度并反相

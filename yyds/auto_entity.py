@@ -194,6 +194,7 @@ class Node:
         self.text: str = node_obj.get("text")
         self.desc: str = node_obj.get("desc")
         self.id: str = node_obj.get("id")
+        self.hash_code = int(node_obj.get("hashCode"))
         self.index: int = int(node_obj.get("index"))
         self.is_check_able: bool = node_obj.get("isCheckable")
         self.is_clicked: bool = node_obj.get("isChecked")
@@ -205,6 +206,15 @@ class Node:
         self.is_scroll_able: bool = node_obj.get("isScrollable")
         self.is_selected: bool = node_obj.get("isSelected")
         self.is_visible: bool = node_obj.get("isVisible")
+        self.dump_time_ms: int = node_obj.get("dumpTimeMs")
+
+    @property
+    def cx(self) -> int:
+        return self.center_point[0]
+
+    @property
+    def cy(self) -> int:
+        return self.center_point[1]
 
     @property
     def center_point(self) -> (int, int):
@@ -270,7 +280,7 @@ class EngineResultParser:
         return Color(int(rgb_split[0]), int(rgb_split[1]), int(rgb_split[2]))
 
     @staticmethod
-    def parse_multi_color(rgb_text: str) -> (Color, ):
+    def parse_multi_color(rgb_text: str) -> (Color,):
         """
         从以空格为分隔的多个颜色中解析获取实例数组
         """

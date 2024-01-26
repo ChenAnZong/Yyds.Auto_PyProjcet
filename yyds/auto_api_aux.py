@@ -196,8 +196,9 @@ def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
 def ui_match(match_from_cache=False, **match_params) -> List[Node]:
     """
     当前屏幕ui控件定位
+    :param match_from_cache 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :param match_from_cache 是否从最后一次dump的缓存中匹配 可以加快搜索速度
-    :returns: 识别结果
+    :returns: 识别结果, 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {"match_from_cache": "true" if match_from_cache else "false"}
     for k in match_params.keys():
@@ -209,9 +210,53 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
     return [Node(i) for i in json.loads(ret_str)]
 
 
+def ui_parent(node: Node) -> List[Node]:
+    """
+    获取一个节点的父节点
+    :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
+    注意父节点是往上遍历的, 即结果数组后面的元素是前面元素的父节点
+    """
+    params_ = {
+        "hashcode": node.hash_code,
+        "dump_time_ms": node.dump_time_ms,
+        "type": "parent"
+    }
+    ret_str = engine_api("/uia-relation", params_)
+    return [Node(i) for i in json.loads(ret_str)]
+
+
+def ui_child(node: Node) -> List[Node]:
+    """
+    获取一个节点的子节点
+    :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
+    """
+    params_ = {
+        "hashcode": node.hash_code,
+        "dump_time_ms": node.dump_time_ms,
+        "type": "child"
+    }
+    ret_str = engine_api("/uia-relation", params_)
+    return [Node(i) for i in json.loads(ret_str)]
+
+
+def ui_sib(node: Node) -> List[Node]:
+    """
+    获取一个节点的旁系节点(兄弟节点), 结果不包含自己
+    :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
+    """
+    params_ = {
+        "hashcode": node.hash_code,
+        "dump_time_ms": node.dump_time_ms,
+        "type": "sib"
+    }
+    ret_str = engine_api("/uia-relation", params_)
+    return [Node(i) for i in json.loads(ret_str)]
+
+
 def ui_exist(match_from_cache=False, **match_params) -> bool:
     """
-    ui 是否存在
+    检查 ui 是否存在
+    :param match_from_cache 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :returns bool ui是否存在
     """
     params_ = {"match_from_cache": "true" if match_from_cache else "false"}

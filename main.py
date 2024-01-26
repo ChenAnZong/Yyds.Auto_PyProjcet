@@ -1,8 +1,8 @@
 """
-@author  玩机达人 微信:wjzy_yyds
+@author  玩机达人 微信: wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
-@version 对应 Yyds.Auto 版本: 89(5.42)
+@version 对应 Yyds.Auto 版本: 92(5.5)
 """
 import os
 import json
@@ -174,6 +174,7 @@ def main_():
 
 
 def main():
+    # 打印与自动化引擎的跨进城通讯日志, 适用于调试, 会打印大量日志
     engine_set_debug(True)
     log_d("===开始脚本执行! ")
     # log_d("获取坐标颜色:", get_color(979, 611))
@@ -187,11 +188,26 @@ def main():
     #       find_color("7,203,117"))
     # log_d("多点找色2:",
     #       find_color("7,203,117", bias_points=["-313,0|~243,46,14"], max_fuzzy=20))
+
     log_d("获取到粘贴版文本:" + get_clipboard())
     toast("运行完毕")
 
+    # 测试下匹配桌面图标下的应用名
+    ks = ui_match(content_desc="快手")[0]
+    log_d("搜索节点:", ks)
+
+    # 匹配所有图标下的应用名
+    # log_d("兄", ui_sib(ks))
+    # log_d("父", ui_parent(ks))
+    # log_d("子", ui_child(ks))
+
+    # 主页有一堆图标, 点击桌面的第一个应用
+    click_target(ui_sib(ks)[0])
+
+
+
 
 """
-1. main 函数为Yyds.Auto工程的入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
+1.main 函数为Yyds.Auto工程的入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
 2.如果代码有BUG 请联系作者24小时内处理解决
 """
