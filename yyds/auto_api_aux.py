@@ -93,7 +93,7 @@ def open_url(url):
     成功返回:Starting: Intent { act=android.intent.action.VIEW dat=tel:xxxxxxxxxx }
     错误返回:Starting: Intent { act=android.intent.action.VIEW dat=asdfs } Error: Activity not started, unable to resolve Intent { act=android.intent.action.VIEW dat=asdfs flg=0x10000000 }
     """
-    return engine_api("/open-url", {"url", url})
+    return engine_api("/open-url", {"url": url})
 
 
 def device_foreground() -> Optional[DeviceForegroundResponse]:
@@ -491,6 +491,7 @@ def x_input_clear() -> bool:
 def set_yy_input_enable(enable: bool) -> bool:
     """
     启用或禁用YY输入法
+    :param 设置为False 若当前为YY输入法, 退出并切换回上个输入法
     """
     return engine_api("/enable-yy-input", {"enable": "true" if enable else "false"}) == "true"
 

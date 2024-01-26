@@ -2,7 +2,7 @@
 @author  玩机达人 微信: wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
-@version 对应 Yyds.Auto 版本: 92(5.5)
+@version 对应 Yyds.Auto 版本: 93(5.51)
 """
 import os
 import json
