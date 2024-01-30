@@ -28,6 +28,8 @@ class ProjectEnvironment:
     CWD = os.getcwd()
     # 在开发中, 如果是调试模式, 将会打印更多日志
     DEBUG_MODE = False
+    DEBUG_IP = ""
+    IMPORT_JAVA_SUCCESS = False
     # 全局配置(包括ui配置)
     GLOBAL_CONFIG = dict()
 
@@ -186,7 +188,7 @@ def engine_set_debug(is_debug: bool):
     """
     :param is_debug 是否打印与自动化引擎通讯的日志
     """
-    ProjectEnvironment._DEBUG_MODE = is_debug
+    ProjectEnvironment.DEBUG_MODE = is_debug
 
 
 def __handle_screen_rect_args(args: dict, x=None, y=None, w=None, h=None):
@@ -216,8 +218,16 @@ try:
     # 下面两句代码调用java, 与自动化引擎进行通讯, 在IDE中识别不到, 会提示错误请忽略!
     from uiautomator import ExportHandle as EngineApi
     from java.util import HashMap
+    ProjectEnvironment.IMPORT_JAVA_SUCCESS = True
 except:
-    print(traceback.format_exc(), file=sys.stderr)
+    # 如果是PC环境运行, 会导入失败, 使用http与引擎进行通讯, 使用在电脑上可以正常运行代码
+    from configparser import ConfigParser
+
+    project_config = ConfigParser()
+    # 读取调试机IP地址
+    project_config.read(os.path.join(os.getcwd(), "project.config"))
+    ProjectEnvironment.DEBUG_IP = project_config["DEBUG_DEVICE_IP"]
+    log_d(f"当前连接调试设备IP: {ProjectEnvironment.DEBUG_IP}")
 
 
 def engine_api(uri: str, options=None) -> str:
@@ -230,12 +240,16 @@ def engine_api(uri: str, options=None) -> str:
         options = {}
     if options is None:
         options = {}
-    params = HashMap()
-    if options:
-        for key in options.keys():
-            params.put(key, str(options[key]))
-    ret = EngineApi.http(uri, params)
-    if ProjectEnvironment._DEBUG_MODE:
+    if ProjectEnvironment.IMPORT_JAVA_SUCCESS :
+        params = HashMap()
+        if options:
+            for key in options.keys():
+                params.put(key, str(options[key]))
+        ret = EngineApi.http(uri, params)
+    else:
+        # 49009是引擎通讯端口
+        ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009{uri}", json=options)
+    if ProjectEnvironment.DEBUG_MODE:
         t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"{t}:{uri}__{options}___))){ret})))))))\n")
     return ret
