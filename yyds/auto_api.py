@@ -24,12 +24,13 @@ class ProjectEnvironment:
     DEFAULT_UI_DUMP_PATH = "/sdcard/"
     # 默认的控件信息抓取保存目录
     DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
-    # 当前运行的工程目录
+    # 当前手机运行的工程目录
     CWD = os.getcwd()
     # 在开发中, 如果是调试模式, 将会打印更多日志
     DEBUG_MODE = False
+    PROJECT_NAME = ""
     DEBUG_IP = ""
-    IMPORT_JAVA_SUCCESS = False
+    IMPORT_JAVA_SUCCESS = False  # IMPORT_JAVA_SUCCESS == Ture 我们可以认定当前代码使用手机引擎运行, 否则在电脑上运行
     # 全局配置(包括ui配置)
     GLOBAL_CONFIG = dict()
 
@@ -39,7 +40,17 @@ class ProjectEnvironment:
         返回当前正在运行的工程目录名(目录名不一定与工程名字相同, 目录名具有唯一性)
         在引擎内部, 将工程目录名视为唯一ID
         """
-        return os.path.basename(cls.CWD)
+        if cls.IMPORT_JAVA_SUCCESS:
+            return os.path.basename(cls.CWD)
+        else:
+            return cls.PROJECT_NAME
+
+    @classmethod
+    def current_project_dir(cls) -> str:
+        """
+        返回当前手机上正在运行的工程目录
+        """
+        return f"/sdcard/Yyds.Py/{cls.current_project()}"
 
 
 class Config:
@@ -209,8 +220,8 @@ def __handle_image_path(image) -> str:
     """
     自动处理, 补全我们的文件路径到引擎
     """
-    real_path = os.path.join(ProjectEnvironment.CWD, image) if os.path.exists(
-        os.path.join(ProjectEnvironment.CWD, image)) else image
+    real_path = os.path.join(ProjectEnvironment.current_project_dir(), image) if os.path.exists(
+        os.path.join(ProjectEnvironment.current_project_dir(), image)) else image
     return real_path
 
 
@@ -226,7 +237,8 @@ except:
     project_config = ConfigParser()
     # 读取调试机IP地址
     project_config.read(os.path.join(os.getcwd(), "project.config"))
-    ProjectEnvironment.DEBUG_IP = project_config["DEBUG_DEVICE_IP"]
+    ProjectEnvironment.DEBUG_IP = project_config["default"]["DEBUG_DEVICE_IP"]
+    ProjectEnvironment.PROJECT_NAME = project_config["default"]["PROJECT_NAME"]
     log_d(f"当前连接调试设备IP: {ProjectEnvironment.DEBUG_IP}")
 
 
@@ -240,7 +252,7 @@ def engine_api(uri: str, options=None) -> str:
         options = {}
     if options is None:
         options = {}
-    if ProjectEnvironment.IMPORT_JAVA_SUCCESS :
+    if ProjectEnvironment.IMPORT_JAVA_SUCCESS:
         params = HashMap()
         if options:
             for key in options.keys():
@@ -248,7 +260,7 @@ def engine_api(uri: str, options=None) -> str:
         ret = EngineApi.http(uri, params)
     else:
         # 49009是引擎通讯端口
-        ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009{uri}", json=options)
+        ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009{uri}", json=options).text
     if ProjectEnvironment.DEBUG_MODE:
         t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"{t}:{uri}__{options}___))){ret})))))))\n")
@@ -364,7 +376,7 @@ def screen_yolo_locate(x=None, y=None, w=None, h=None, use_gpu=True) -> str:
 def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1) -> str:
     """
     [底层接口] 在屏幕上同时寻找多张图片, 可以指定范围
-    :param img 图片路径, 如果传入的是相对路径, 则会被处理成绝对路径
+    :param img 图片路径, 建议使用相对路径, 以兼容电脑运行脚本
     :param x: 识别起始点 可以使用相对坐标(0-1)或绝对像素值, 可以想象是从屏幕左边拉条线出来, 线左边区域不要去查找
     :param y: 识别起始点 可以使用相对坐标(0-1)或绝对像素值, 可以想象是从屏幕顶部拉条线出来, 线以上区域不要去查找
     :param w: 宽 可以使用相对坐标(0-1)或绝对像素值, 从左边起始初区域延伸多长距离, 如为空, 则查找到屏幕右边
@@ -374,8 +386,17 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1)
         threshold == 0  对图片进行灰度并反相
         threshold > 0   对图片进行反相并二值化处理(THRESH_BINARY的方式进行二值化), threshold取值范围应为1-255
     """
-    imgs_ = [os.path.join(ProjectEnvironment.CWD, i) if os.path.exists(os.path.join(ProjectEnvironment.CWD, i)) else i
-             for i in img]
+    # 如果脚本在电脑上运行, 需要将问题提交到手机指定目录
+    if not ProjectEnvironment.IMPORT_JAVA_SUCCESS:
+        imgs_ = []
+        for pi in img:
+            imgs_.append(os.path.join(ProjectEnvironment.current_project_dir(), pi))
+            if not post_file(pi, os.path.join(ProjectEnvironment.current_project_dir(), os.path.dirname(pi))):
+                raise RuntimeError(f"提交文件到手机: {pi} -> {ProjectEnvironment.current_project_dir()}/{pi} 失败☹️")
+            if ProjectEnvironment.DEBUG_MODE:
+                log_d(f"调试:提交文件到手机: {pi} -> {ProjectEnvironment.current_project_dir()}/{pi} 成功")
+    else:
+        imgs_ = [__handle_image_path(i) for i in img]
     args = {"templates": ";".join(imgs_), "threshold": threshold}
     __handle_screen_rect_args(args, x, y, w, h)
     return engine_api("/screen-find-images", args)
@@ -499,3 +520,38 @@ def cancel_kernel_click():
     :returns: 当前是否使用内核点击
     """
     return engine_api("/set-no-ra", {"enable": "true"})
+
+
+def pull_file(remote: str, local: str) -> bool:
+    """
+    在电脑运行脚本上拉取手机对文件到本地
+    @param remote: 远程手机文件路径
+    @param local: 本地文件路径
+    :returns: bool 是否操作成功
+    """
+    r = requests.get(f"http://{ProjectEnvironment.DEBUG_IP}:49009/pull-file?path={remote}", stream=True)
+    if r.status_code == 200:
+        with open(local, 'wb+') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+        return True
+    return False
+
+
+def post_file(local: str, remote_dir: str = "/sdcard") -> bool:
+    """
+    在电脑运行脚本上拉取手机对文件到本地
+    @param local: 本地文件绝对路径
+    @param remote_dir: 远程手机目录, 默认为/sdcard
+    :returns: bool 是否操作成功
+    """
+    print("参数:", remote_dir, os.path.basename(local))
+    f = open(local, mode="rb")
+    r = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009/post-file", data={
+        "path": remote_dir
+    }, files={
+        os.path.basename(local): f.read()
+    })
+    f.close()
+    print("提交返回:", r.status_code, r.text)
+    return r.status_code < 300

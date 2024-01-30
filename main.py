@@ -2,7 +2,7 @@
 @author  玩机达人 微信: wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
-@version 对应 Yyds.Auto 版本: 93(5.51)
+@version 对应 Yyds.Auto 版本: 94(5.6)
 """
 import os
 import json
@@ -174,6 +174,11 @@ def main_():
 
 
 def main():
+    """
+    1.main 函数为Yyds.Auto工程的入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
+    2.如果代码有BUG 请联系作者24小时内处理解决
+    """
+
     # 打印与自动化引擎的跨进城通讯日志, 适用于调试, 会打印大量日志
     engine_set_debug(True)
     log_d("===开始脚本执行! ")
@@ -193,8 +198,8 @@ def main():
     toast("运行完毕")
 
     # 测试下匹配桌面图标下的应用名
-    ks = ui_match(content_desc="快手")[0]
-    log_d("搜索节点:", ks)
+    # ks = ui_match(content_desc="快手")[0]
+    # log_d("搜索节点:", ks)
 
     # 匹配所有图标下的应用名
     # log_d("兄", ui_sib(ks))
@@ -202,12 +207,9 @@ def main():
     # log_d("子", ui_child(ks))
 
     # 主页有一堆图标, 点击桌面的第一个应用
-    click_target(ui_sib(ks)[0])
+    # click_target(ui_sib(ks)[0])
 
 
-
-
-"""
-1.main 函数为Yyds.Auto工程的入口，不可更改此函数名！此函数会被导入执行，无须在工程主动运行
-2.如果代码有BUG 请联系作者24小时内处理解决
-"""
+# 如果在电脑运行脚本, 则主动调用main()入口函数
+if not ProjectEnvironment.IMPORT_JAVA_SUCCESS:
+    main()
