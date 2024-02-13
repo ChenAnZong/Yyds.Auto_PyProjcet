@@ -6,7 +6,7 @@ from .auto_plus import *
 
 class WrapRecord:
     """
-    界面与TASK的注册记录, 从c++角度来看, 我们这里存着一些函数指针, 需要的时候跳过去执行
+    界面与TASK的注册记录, 两个字典, 记录着名称与对应的函数, 需要的时候跳过去执行
     """
     ACTIVITY_HANDLER = dict()
     TASK_HANDLER = dict()
@@ -14,9 +14,10 @@ class WrapRecord:
 
 def try_run(func, print_exception=True):
     """
-    :param func 函数
-    :param print_exception 是否打印函数运行异常
-    运行func函数, 并且捕抓其运行异常
+    运行func函数, 并捕抓其运行异常
+
+    :param func: 函数
+    :param print_exception: 是否打印函数运行异常
     """
     try:
         return func()
@@ -80,9 +81,10 @@ def retry_until_true(retry_time=40, interval=1):
 
 def register_task(*task_name):
     """
-    :param task_name 任务名字
     把一个函数当作一个任务
     装饰器 注册任务
+
+    :param task_name: 任务名字
     """
 
     def run(func):
@@ -99,8 +101,9 @@ def register_task(*task_name):
 
 def handle_task(task_name: str):
     """
-    :param task_name 任务名字
     执行处理`register_task`注册的任务
+
+    :param task_name: 任务名字
     """
     if task_name in WrapRecord.TASK_HANDLER:
         WrapRecord.TASK_HANDLER[task_name]()
@@ -115,8 +118,9 @@ def get_activity_handler(name: str):
 
 def run_activity_handler(*names: str):
     """
-    :param names 注册的活动名, 可变参数, 即可同时注册多个
     判断当前设备活动名是否为注册的活动名, 如果是, 则执行任务, 如果不是, 则打印日志
+
+    :param names: 注册的活动名, 可变参数, 即可同时注册多个
     """
 
     def run(func):
@@ -144,9 +148,10 @@ def run_activity_handler(*names: str):
 def do(times: int, interval: float, pre_interval: bool, *func):
     """
     高级函数 循环并且间隔n秒执行一箩筐的函数, 或许能够显得代码工整点吧~
-    :param times 执行次数
-    :param interval 执行间隔秒数
-    :param func 可变参数, 执行的函数
+
+    :param times: 执行次数
+    :param interval: 执行间隔秒数
+    :param func: 可变参数, 执行的函数
     """
     if isinstance(pre_interval, bool) and pre_interval:
         time.sleep(pre_interval)
@@ -158,8 +163,9 @@ def do(times: int, interval: float, pre_interval: bool, *func):
 
 def loop_activity_handle(other):
     """
-    :param other
     把脚本主循环交给界面处理器, 当手机在不同的界面时, 会执行不同的函数
+
+    :param other: 如果找到想应的界面, 则进行other函数
     """
     while True:
         time.sleep(1)
@@ -176,10 +182,10 @@ def loop_activity_handle(other):
 
 def run_until_true(func, max_times: int):
     """
-    高级函数
-    :param func 函数
-    :param max_times 次数
     最大尝试max_times次运行func, 如果结果为真, 则立马返回
+
+    :param func: 函数
+    :param max_times: 次数
     """
     for i in range(max_times):
         log_d(f"⇛ 执行直至成功{i}:")

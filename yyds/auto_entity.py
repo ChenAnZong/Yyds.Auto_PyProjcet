@@ -8,8 +8,8 @@ class Point:
     """
 
     def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
+        self.x = x  # 横轴
+        self.y = y  # 纵轴
 
     def __str__(self):
         return f'Point({self.x}, {self.y})'
@@ -20,18 +20,19 @@ class Point:
 
 class Color:
     """
-    颜色
+    RGB颜色
     """
 
     def __init__(self, r: int, g: int, b: int):
-        self.r = r
-        self.g = g
-        self.b = b
+        self.r = r  # 红色分量
+        self.g = g  # 绿色分量
+        self.b = b  # 蓝色分量
 
     def similarity_to(self, color2) -> float:
         """
         使用 HS 欧拉距离计算算法, 计算与另一个颜色的相似度
-        :param color2 另一个Color
+
+        :param color2: 另一个Color
         :returns: 0-1之间的浮点数, 数字越大, 两个颜色越相似
         """
         h1, s1, v1 = colorsys.rgb_to_hsv(self.r, self.g, self.b)
@@ -53,7 +54,8 @@ class Color:
 
 class ResFindImage:
     """
-    自动化引擎 封装高级查找图片(模版匹配算法)请求参数 所有坐标均为屏幕绝对坐标
+    自动化引擎 封装高级查找图片(模版匹配算法)请求参数
+    所有坐标均为屏幕绝对坐标
     """
 
     def __init__(self, name: str, path: str, prob: float, width: int, height: int, x: int, y: int):
@@ -83,7 +85,8 @@ class ResFindImage:
 
 class ResYolo:
     """
-    自动化引擎 封装高级查找图片(Yolo ai算法)返回结果, 所有坐标均为屏幕绝对坐标
+    自动化引擎 封装高级查找图片(Yolo算法)返回结果
+    所有坐标均为屏幕绝对坐标
     """
 
     def __init__(self, label: str, cx: int, cy: int, x: float, y: float, w: float, h: float, prob: float):
@@ -94,7 +97,7 @@ class ResYolo:
         self.y = y  # 左上角 y
         self.w = w  # 宽
         self.h = h  # 高
-        self.prob = prob  # yolo 识别置信率
+        self.prob = prob  # yolo 识别置信率, 范围0-1.0
 
     def __repr__(self):
         return str(self)
@@ -108,8 +111,8 @@ class ResYolo:
 
 class ResOcr:
     """
-    自动化引擎 封装OCR识别返回结果, 所有坐标均为绝对坐标
-    :param x1
+    自动化引擎 封装OCR识别返回结果
+    所有坐标均为绝对坐标
     """
 
     def __init__(self, prob: float, text: str, x1: int, y1: int, x2: int, y2: int, x3: int, y3: int,
@@ -130,23 +133,29 @@ class ResOcr:
     @property
     def cx(self):
         """
-        中间 x
+        :returns: 中间坐标 x
         """
         return int((self.x1 + self.x3) / 2)
 
     @property
     def cy(self):
         """
-        中间 y
+        :returns: 中间坐标 y
         """
         return int((self.y1 + self.y3) / 2)
 
     @property
     def h(self):
+        """
+        :return: 高
+        """
         return int(self.y3 - self.y2)
 
     @property
     def w(self):
+        """
+        :return: 宽
+        """
         return int(self.x3 - self.x1)
 
     def __str__(self):
@@ -158,6 +167,9 @@ class ResOcr:
 
 
 class DeviceForegroundResponse:
+    """
+    设备前台运行的应用信息
+    """
     def __init__(self, package: str, activity: str, pid: int):
         """
         :param package 进程包名
@@ -182,31 +194,37 @@ class DeviceForegroundResponse:
 
 class Node:
     """
-    控件元素实例
+    控件元素
     """
 
     def __init__(self, node_obj: dict):
-        self.bound_str: str = node_obj.get("boundsString")
-        self.child_count: int = node_obj.get("childCount")
-        self.parent_count: int = node_obj.get("parentCount")
-        self.class_name: str = node_obj.get("cls")
-        self.pkg: str = node_obj.get("pkg")
-        self.text: str = node_obj.get("text")
-        self.desc: str = node_obj.get("desc")
-        self.id: str = node_obj.get("id")
-        self.hash_code = int(node_obj.get("hashCode"))
-        self.index: int = int(node_obj.get("index"))
-        self.is_check_able: bool = node_obj.get("isCheckable")
-        self.is_clicked: bool = node_obj.get("isChecked")
-        self.is_enable: bool = node_obj.get("isEnable")
-        self.is_foucuable: bool = node_obj.get("isFocusable")
-        self.is_foucesed: bool = node_obj.get("isFocused")
-        self.is_long_click_able: bool = node_obj.get("isLongClickable")
-        self.is_password: bool = node_obj.get("isPassword")
-        self.is_scroll_able: bool = node_obj.get("isScrollable")
-        self.is_selected: bool = node_obj.get("isSelected")
-        self.is_visible: bool = node_obj.get("isVisible")
-        self.dump_time_ms: int = node_obj.get("dumpTimeMs")
+        """
+        初始化Node对象
+
+        :param node_obj: 包含节点信息的字典对象
+        :type node_obj: dict
+        """
+        self.bound_str: str = node_obj.get("boundsString")  # 控件的边界字符串描述
+        self.child_count: int = node_obj.get("childCount")  # 子节点数量
+        self.parent_count: int = node_obj.get("parentCount")  # 父节点数量
+        self.class_name: str = node_obj.get("cls")  # 控件类名
+        self.pkg: str = node_obj.get("pkg")  # 控件所在应用的包名
+        self.text: str = node_obj.get("text")  # 控件文本内容
+        self.desc: str = node_obj.get("desc")  # 控件描述
+        self.id: str = node_obj.get("id")  # 控件ID
+        self.hash_code = int(node_obj.get("hashCode"))  # 控件的唯一标识, 由引擎进行生成
+        self.index: int = int(node_obj.get("index"))  # 控件索引
+        self.is_check_able: bool = node_obj.get("isCheckable")  # 是否可被勾选
+        self.is_clicked: bool = node_obj.get("isChecked")  # 是否被点击
+        self.is_enable: bool = node_obj.get("isEnable")  # 是否可用
+        self.is_foucuable: bool = node_obj.get("isFocusable")  # 是否可获取焦点
+        self.is_foucesed: bool = node_obj.get("isFocused")  # 是否已获取焦点
+        self.is_long_click_able: bool = node_obj.get("isLongClickable")  # 是否可长按
+        self.is_password: bool = node_obj.get("isPassword")  # 是否为密码输入框
+        self.is_scroll_able: bool = node_obj.get("isScrollable")  # 是否可以滚动
+        self.is_selected: bool = node_obj.get("isSelected")  # 是否已被选中
+        self.is_visible: bool = node_obj.get("isVisible")  # 是否可见
+        self.dump_time_ms: int = node_obj.get("dumpTimeMs")  # 控件的显示时间, 非系统获取, 由引擎进行生成
 
     @property
     def cx(self) -> int:
@@ -220,6 +238,8 @@ class Node:
     def center_point(self) -> (int, int):
         """
         返回节点的中间坐标点, 方便用于点击
+
+        :returns: 中间坐标的x, y轴数值
         """
         s = [i for i in re.split(r"\[|\]|,", self.bound_str) if i != ""]
         x1 = int(s[0])
@@ -240,7 +260,7 @@ class Node:
 
 class RequestFindImage:
     """
-    自动化引擎 查找图片请求参数
+    引擎查找图片请求参数
     """
 
     def __init__(self, name: str, path: str, min_prob: float):
@@ -256,12 +276,15 @@ class RequestFindImage:
 
 
 class MatchImageResult:
+    """
+    引擎匹配图片返回结果
+    """
     def __init__(self, x: int, y: int, w: int, h: int, prob: float):
-        self.x = x
-        self.y = y
-        self.w = w
-        self.h = h
-        self.prob = prob
+        self.x = x  # 匹配到到左上角x坐标
+        self.y = y  # 匹配到到左上角y坐标
+        self.w = w  # 匹配图像的宽
+        self.h = h  # 匹配图像的高
+        self.prob = prob  # 匹配图像的相似度, 范围为0-1.0
 
     def __str__(self):
         return f"MatchImageResult(x={self.x}, y={self.y}, w={self.w}, h={self.h}, prob={self.prob})"
@@ -271,6 +294,10 @@ class MatchImageResult:
 
 
 class EngineResultParser:
+    """
+    引擎颜色字符串转化解析
+    """
+
     @staticmethod
     def parse_color(rgb_text: str) -> Color:
         """

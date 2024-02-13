@@ -2,7 +2,7 @@
 @author  玩机达人 微信: wjzy_yyds
 @desc    Yyds.Auto 官方封装Python函数 更多用法 https://yydsxx.com
 @tip     _x结尾系列为高级封装函数, 一般使用此类函数; _开头为内部函数, 一般不对外使用
-@version 对应 Yyds.Auto 版本: 94(5.6)
+@version 对应 Yyds.Auto 版本: 96(5.70)
 """
 import os
 import json
@@ -182,7 +182,7 @@ def main():
     # 打印与自动化引擎的跨进城通讯日志, 适用于调试, 会打印大量日志
     engine_set_debug(True)
     log_d("===开始脚本执行! ")
-    # log_d("获取坐标颜色:", get_color(979, 611))
+    log_d("获取坐标颜色:", get_color(979, 611))
     # # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
     # log_d("颜色查找:", find_color("33,146,38", max_fuzzy=10, y=.2, x=.7, max_counts=6, step_y=80))
     # if os.path.exists("/sdcard/1.jpg") and os.path.exists("/sdcard/2.jpg"):

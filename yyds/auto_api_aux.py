@@ -13,12 +13,13 @@ def click_double(x: Union[str, int], y: Union[str, int]):
 def swipe(x1, y1, x2, y2, duration, is_random: bool = False):
     """
     滑动
-    :param x1 起始坐标 x
-    :param y1 起始坐标 y
-    :param x2 目标坐标 x
-    :param y2 目标坐标 y
-    :param duration 滑动耗时（毫秒） 越小滑动越快
-    :param is_random 是否随机进行滑动(会画出一条锯齿一样的线, 而不是纯直线)
+
+    :param x1: 起始坐标 x
+    :param y1: 起始坐标 y
+    :param x2: 目标坐标 x
+    :param y2: 目标坐标 y
+    :param duration: 滑动耗时（毫秒） 越小滑动越快
+    :param is_random: 是否随机进行滑动(会画出一条锯齿一样的线, 而不是纯直线)
     """
     engine_api("/swipe", {"x1": int(x1), "x2": int(x2),
                           "y1": int(y1), "y2": int(y2), "duration": int(duration), "random": is_random})
@@ -54,8 +55,9 @@ def key_confirm():
 
 def key_code(code):
     """
-    注入键值码, 键值码数值, 请参考yydsxx.com <<Android KeyCode 键码对照表>>
-    @param code 键值码
+    注入键值码, 键值码数值, 请参考yydsxx.com, 参考文章[Android KeyCode 键码对照表](http://yydsxx.com/blog/android%20keycode%20table)
+
+    :param code: 键值码
     """
     engine_api("/key-code", {"code", int(code)})
 
@@ -63,8 +65,9 @@ def key_code(code):
 def device_get_screen_size() -> (int, int):
     """
     获取屏幕分辨率大小
+
     ⚠️ 注意:竖屏与横屏返回的数值在屏幕发生旋转时候不一样, 比如竖屏时候, 返回(1080, 1920); 在横屏时候, 返回(1920, 1080), 我们在使用百分比坐标系统时候尤其需要注意这一点
-    :returns 宽, 高
+    :returns: 宽, 高
     """
     ret = engine_api("/screen-size")
     x, y = ret.split(",")
@@ -74,32 +77,39 @@ def device_get_screen_size() -> (int, int):
 def stop_app(pkg):
     """
     停止应用运行, 相当于从任务栏划掉app
+
+    :returns: 无
     """
     return shell(f"am force-stop {pkg}")
 
 
 def open_app(pkg):
     """
-    根据包名打开app
+    根据包名打开应用
+
+    :params: 应用包名, 如系统不便查看应用包名, 可通过如"设备信息"等三方应用进行查看
+    :returns: 无
     """
     return engine_api("/open-app", {"pkg": pkg})
 
 
 def open_url(url):
     """
-    打开系统u rl
-    如果 url为 http 链接, 即使用系统默认的浏览器应用
-    也能打开其它系统链接 比如电话tel:21113336
-    成功返回:Starting: Intent { act=android.intent.action.VIEW dat=tel:xxxxxxxxxx }
+    通过匹配intent打开网页, 电话等页面, 会使用系统默认应用进行打开\n
+    如果 url为 http 链接, 即使用系统默认的浏览器应用, 也能打开其它系统链接 比如电话tel:21113336\n
+    成功返回:Starting: Intent { act=android.intent.action.VIEW dat=tel:xxxxxxxxxx }\n
     错误返回:Starting: Intent { act=android.intent.action.VIEW dat=asdfs } Error: Activity not started, unable to resolve Intent { act=android.intent.action.VIEW dat=asdfs flg=0x10000000 }
+
+    :returns: intent 命令的输出
     """
     return engine_api("/open-url", {"url": url})
 
 
 def device_foreground() -> Optional[DeviceForegroundResponse]:
     """
-    当前设备信息
-    :returns: 当前包名, 当前应用Activity名(有时相对, 有时绝对取决于应用), 应用进程 pid
+    获取当前设备前台运行信息
+
+    :returns: 前台运行信息, 包含有当前进程pid, 活动名, 应用包名信息
     """
     result = engine_api('/foreground')
     s = result.split(" ")
@@ -110,7 +120,8 @@ def device_foreground() -> Optional[DeviceForegroundResponse]:
 
 def device_foreground_activity() -> str:
     """
-    比device_foreground 更快 
+    比device_foreground 更快
+
     :returns: 当前活动界面名
     """
     return engine_api("/foreground-fast")
@@ -118,7 +129,8 @@ def device_foreground_activity() -> str:
 
 def device_foreground_package() -> str:
     """
-    比device_foreground 更快 
+    比device_foreground 更快
+
     :returns: 当前前台包名
     """
     return engine_api("/foreground-pkg")
@@ -134,6 +146,7 @@ def is_app_running(pkg: str) -> bool:
 def bring_app_to_top(pkg: str) -> bool:
     """
     将后台运行的应用带回前台
+
     :returns: 是否操作成功
     """
     return engine_api("/background-to-top", {"pkg": pkg}) == "true"
@@ -142,22 +155,28 @@ def bring_app_to_top(pkg: str) -> bool:
 def is_in_app(pkg: str) -> bool:
     """
     当前是否在某应用界面内
-    :param pkg 应用包名
+
+    :param pkg: 应用包名
+    :returns: 当前当前是否在某应用界面内
     """
     return pkg == device_foreground_package()
 
 
-def device_code():
+def device_code() -> str:
     """
-    应用imei码, 可作为应用唯一硬件码, 提醒:在root下此码可被轻易篡改返回结果
-    :returns: str
+    应用imei码, 可作为应用唯一硬件码, 如获取失败则获取meid或者cpu序列号
+
+    :returns: 唯一设备硬件码
     """
     return engine_api("/imei")
 
 
 def device_model() -> str:
     """
-    当前手机型号, 类似命令可以自定义很多, 比如获取当前设备代号 ```shell("getprop ro.product.device")```
+    获取当前手机型号
+    学习指南:类似命令可以自定义很多, 比如获取当前设备代号 ```shell("getprop ro.product.device")```
+
+    :returns: 手机型号
     """
     return shell("getprop ro.product.model")
 
@@ -165,6 +184,7 @@ def device_model() -> str:
 def is_net_online() -> bool:
     """
     通过请求指定链接测试当前网络是否畅通
+
     :returns: 当前设备网络是否连通
     """
     return engine_api("/is-net-online") == "true"
@@ -175,6 +195,10 @@ def model_yolo_reload(ncnn_bin_path, ncnn_param_path):
     自定义你的yolo模型, 需要转换为ncnn模型
     默认加载 /data/local/tmp/yyds.bin
     默认加载 /data/local/tmp/yyds.param
+
+    :param ncnn_bin_path: bin文件路径
+    :param ncnn_param_path: param文件路径
+    :returns: 无
     """
     engine_api("/set-yolo-model", {
         "bin_file_path": ncnn_bin_path,
@@ -184,8 +208,12 @@ def model_yolo_reload(ncnn_bin_path, ncnn_param_path):
 
 def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
     """
-    自定义你的pp ocr模型, 需要转换为ncnn模型
-    引擎内置OCR模型, 一般不用自己训练
+    自定义你的pp ocr模型, 需要转换为ncnn模型, 若已经加载过模型, 则进行重新加载\n
+    提示: 引擎已内置OCR模型, 一般不用自己训练, 如需要艺术字识别等场景可以自行训练
+
+    :param ncnn_bin_path: bin文件路径
+    :param ncnn_param_path: param文件路径
+    :returns: 无
     """
     engine_api("/set-ocr-model", {
         "bin_file_path": ncnn_bin_path,
@@ -195,9 +223,38 @@ def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
 
 def ui_match(match_from_cache=False, **match_params) -> List[Node]:
     """
-    当前屏幕ui控件定位
-    :param match_from_cache 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
-    :param match_from_cache 是否从最后一次dump的缓存中匹配 可以加快搜索速度
+    扫描当前屏幕所有ui控件并进行匹配\n
+
+    注意因为python中变量命名无法包含横杠-, 所以使用_代替, class用class_代替\n
+    ```python
+    ui_match(context_desc="资讯", drawing_order="2")
+    ```
+
+    **支持以下匹配规则**\n
+    1. 使用正则(适用java正则)
+    2. 使用范围限定(可使用大于小于号进行数值限定)
+    3. 结合父子兄关系进行定位
+        - 所有父节点 以par_开头
+        - 所有兄节点 以sib_开头
+        - 所有子节点 以chi_开头
+    4. 使用控件尺寸进行定位, 支持 > 与 < 符号进行范围指定
+        - width 宽
+        - height 高
+    5. 限制控件屏幕方位
+        - top 上
+        - bottom 下
+        - left 左
+        - right  右
+    \n
+    匹配例子:
+
+    ````python
+    # 结合位置, 大于进行定位, top=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
+    ui_match(text="我的", top=0.5, width=">10")
+    ````
+
+    :param match_params: 匹配参数, 有多个匹配参数就需要匹配全部参数
+    :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :returns: 识别结果, 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {"match_from_cache": "true" if match_from_cache else "false"}
@@ -213,8 +270,9 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
 def ui_parent(node: Node) -> List[Node]:
     """
     获取一个节点的父节点
-    :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
     注意父节点是往上遍历的, 即结果数组后面的元素是前面元素的父节点
+
+    :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {
         "hashcode": node.hash_code,
@@ -228,6 +286,7 @@ def ui_parent(node: Node) -> List[Node]:
 def ui_child(node: Node) -> List[Node]:
     """
     获取一个节点的子节点
+
     :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {
@@ -242,6 +301,7 @@ def ui_child(node: Node) -> List[Node]:
 def ui_sib(node: Node) -> List[Node]:
     """
     获取一个节点的旁系节点(兄弟节点), 结果不包含自己
+
     :returns: 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {
@@ -255,9 +315,10 @@ def ui_sib(node: Node) -> List[Node]:
 
 def ui_exist(match_from_cache=False, **match_params) -> bool:
     """
-    检查 ui 是否存在
-    :param match_from_cache 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
-    :returns bool ui是否存在
+    检查符合条件的控件是否存在
+
+    :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
+    :returns: ui是否存在
     """
     params_ = {"match_from_cache": "true" if match_from_cache else "false"}
     match_params["limit"] = 1
@@ -272,6 +333,7 @@ def ui_exist(match_from_cache=False, **match_params) -> bool:
 def shell(*cmd):
     """
     自动化引擎 执行shell脚本, 返回shell字符串, 可执行多条
+    注意引擎内置busybox, PATH的优先级在最前面的是:/data/local/tmp/BB
     :returns: 返回shell执行输出 包括错误流!
     """
     return engine_api("/shell", {"cmd": ";".join(cmd)})
@@ -281,14 +343,18 @@ def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage
                         min_prob: float = 0.5, x=None, y=None, w=None, h=None, threshold: int = -1) \
         -> Tuple[ResFindImage]:
     """
-    查看图片
-    :param fd_images 需要查找的图片
+    查找图片
+
+    :param fd_images 需要查找的图片, 图片数组或元祖, 需要一个可迭代的对象
     :param min_prob  float 最低置信率
     :param x: 识别起始点 可以使用相对坐标(0-1)
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
     :param threshold 图片预处理方式 参考`screen_find_image()`
+
+    :rtype: Tuple[ResFindImage]
+    :returns: 找图结果
     """
     in_list: List[RequestFindImage] = list()
     for fd in fd_images:
@@ -331,15 +397,15 @@ def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage
 def screen_find_image_first_x(fd_images: Tuple[Union[str, RequestFindImage]], min_prob: float = 0.9,
                               x=None, y=None, w=None, h=None, threshold: int = -1) -> Union[ResFindImage, None]:
     """
-    # 屏幕查找图片, 仅返回第一张查找结果
+    屏幕查找图片, 仅返回第一张查找结果
 
-    :param fd_images 需要查找的图片
-    :param min_prob  最低置信率
+    :param fd_images: 需要查找的图片
+    :param min_prob:  最低置信率
     :param x: 识别起始点 可以使用相对坐标(0-1)
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
-    :param threshold 图片预处理方式 参考`screen_find_image()`
+    :param threshold: 图片预处理方式 参考`screen_find_image()`
     :return: 第一张查找到到图片
     """
     find_images = screen_find_image_x(*fd_images, min_prob=min_prob, x=x, y=y, w=w, h=h, threshold=threshold)
@@ -351,7 +417,8 @@ def screen_find_image_first_x(fd_images: Tuple[Union[str, RequestFindImage]], mi
 def screen_yolo_find_x(specify_labels=None, min_prob: float = 0.9, x=None, y=None, w=None, h=None, use_gpu=False) \
         -> Tuple[ResYolo]:
     """
-    通过yolo算法识别当前屏幕内容
+    通过yolo算法识别当前屏幕内容, 注意使用model_yolo_reload函数正确加载自定义模型, 否则加载默认的目录下模型
+
     :param x: 识别起始点 可以使用相对坐标(0-1)
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
@@ -397,7 +464,7 @@ def screen_yolo_find_x(specify_labels=None, min_prob: float = 0.9, x=None, y=Non
 def screen_yolo_find_first_x(labels=None, prob: float = 0.9, x=None, y=None, w=None, h=None, use_gpu=False) \
         -> Union[ResYolo, None]:
     """
-    :returns :略, 请参考yolo_find_x, 返回第一个结果
+    :returns: 请参考yolo_find_x, 返回第一个结果
     """
     if labels is None:
         labels = []
@@ -412,12 +479,14 @@ def screen_yolo_find_first_x(labels=None, prob: float = 0.9, x=None, y=None, w=N
 def screen_ocr_x(specific_texts: Union[list, tuple] = None, x=None, y=None, w=None, h=None, use_gpu=False) \
         -> Tuple[ResOcr]:
     """
+    使用内置ocr模型 对当前屏幕进行 OCR 识别
+
     :param x: 识别起始点 可以使用相对坐标(0-1)
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
     :param use_gpu: 是否使用Gpu运算, 性能差的手机不建议, 会导致手机掉帧
-    :param specific_texts 指定查找文本, 支持 python正则表达式匹配
+    :param specific_texts: 指定查找文本, 支持 python正则表达式匹配
     :returns: OCR识别结果列表
     """
     if isinstance(specific_texts, str):
@@ -442,7 +511,9 @@ def screen_ocr_x(specific_texts: Union[list, tuple] = None, x=None, y=None, w=No
 def screen_ocr_first_x(specific_texts=Union[list, tuple], x=None, y=None, w=None, h=None, use_gpu=False) \
         -> Union[ResOcr, None]:
     """
-    :returns :略, 请参考screen_ocr_x , 返回第一个结果
+    使用内置ocr模型 对当前屏幕进行 OCR 识别, 但只获取第一个返回结果
+
+    :returns: 可参考screen_ocr_x , 返回第一个结果
     """
     if specific_texts is None:
         specific_texts = []
@@ -456,10 +527,11 @@ def screen_ocr_first_x(specific_texts=Union[list, tuple], x=None, y=None, w=None
 
 def image_similarity(img1: str, img2: str, flags: int = 0) -> float:
     """
-    计算两张的图片相似度, 需要两张图片的尺寸一致
-    :param img1 图片1的路径
-    :param img2 图片2的路径
-    :param flags = 0 使用直方图计算; 未来会增加更多的对比算法
+    计算两张的图片相似度, 注意需要两张图片的尺寸一致
+
+    :param img1: 图片1的路径
+    :param img2: 图片2的路径
+    :param flags: 若为0则使用直方图计算; 未来会增加更多的对比算法
     :returns: 返回0-100的浮点数
     """
     return float(engine_api("/image-similarity", {"image1": img1, "image2": img2, "flags": flags}))
@@ -468,48 +540,62 @@ def image_similarity(img1: str, img2: str, flags: int = 0) -> float:
 def input_text(text: str) -> int:
     """
     注入文本, 受安卓系统限制, 不支持中文
+
+    :param text: 文本, (ascii)进允许包含英文数字以及符号
+    :returns: 注入成功的字符个数
     """
     return int(engine_api("/inject-text", {"text": str(text)}))
 
 
 def x_input_text(text: str) -> bool:
     """
-    通过内置 YY 自动输入法输入文本, 需要手动到系统设置启动输入法并切换输入法(或在root下从Yyds.Auto菜单中一键启动)
-    :returns: 仅代表是否发送成功到, 不代表是否执行成功
+    通过内置 YY 自动输入法输入文本, 需要手动到系统设置启动输入法并切换输入法(或在root下从Yyds.Auto菜单中一键启动)\n
+    [更多关于YY输入法的资料](/docs/yyds-auto/yy-input)
+
+    :returns: 仅代表是否发送成功到引擎, 不代表是否执行成功
     """
     return engine_api("/xinput-text", {"text": str(text)}) == "true"
 
 
 def x_input_clear() -> bool:
     """
-    通过内置 YY 自动输入法清空编辑框文本, 需要手动到系统设置启动输入法并切换输入法(或在root下从Yyds.Auto菜单中一键启动)
-    :returns: 仅代表是否发送成功, 不代表是否执行成功
+    通过内置 YY 自动输入法清空编辑框文本, 需要手动到系统设置启动输入法并切换输入法(或在root下从Yyds.Auto菜单中一键启动)\n
+    [更多关于YY输入法的资料](/docs/yyds-auto/yy-input)
+
+    :returns: 仅代表是否发送成功到引擎, 不代表是否执行成功
     """
     return engine_api("/xinput-clear") == "true"
 
 
 def set_yy_input_enable(enable: bool) -> bool:
     """
-    启用或禁用YY输入法
-    :param 设置为False 若当前为YY输入法, 退出并切换回上个输入法
+    启用或禁用YY输入\n
+    [更多关于YY输入法的资料](/docs/yyds-auto/yy-input)
+
+    :param enable: 设置为False 若当前为YY输入法, 退出并切换回上个输入法
+    :returns: 是否已启用
     """
     return engine_api("/enable-yy-input", {"enable": "true" if enable else "false"}) == "true"
 
 
 def app_data_backup(pkg: str, path: str) -> bool:
     """
-    :param pkg 应用包名
-    :param path 备份路径, 备份文件为tar格式
-    备份应用数据
+    备份应用数据到指定的路径
+
+    :param pkg: 应用包名
+    :param path: 备份路径, 备份文件为tar格式
+    :returns: 是否成功
     """
     return engine_api("/backup-app-data", {"package": pkg, "path": path}) == "true"
 
 
 def app_data_recovery(pkg: str, path: str) -> bool:
     """
-    :param pkg 应用包名
-    :param path 备份路径, 备份文件为tar格式, 如/sdcard/1.tar.gz
-    还原应用数据
+    从指定的文件还原应用数据
+
+    :param pkg: 应用包名
+    :param path: 备份路径, 备份文件为tar格式, 如/sdcard/1.tar.gz
+    :returns: 是否成功
     """
     return engine_api("/recovery-app-data", {"package": pkg, "path": path}) == "true"
 
@@ -517,8 +603,10 @@ def app_data_recovery(pkg: str, path: str) -> bool:
 def app_apk_backup(pkg: str, path: str) -> bool:
     """
     提取备份应用安装包(apk), 保存到设备指定位置
-    :param pkg 应用包名
-    :param path 备份到手机路径
+
+    :param pkg: 应用包名
+    :param path: 备份到手机路径
+    :returns: 是否成功
     """
     apk_path = shell(f"pm path {pkg}").replace("package:", "")
     if "data" in apk_path:
@@ -530,10 +618,12 @@ def app_apk_backup(pkg: str, path: str) -> bool:
 
 def app_apk_install(path: str) -> bool:
     """
-    apk 安装
-    :param path 文件路径
-    :returns 是否安装成功
+    进行 apk 安装
+
+    :param path: APK文件路径
+    :returns: 是否安装成功
     """
+
     # 如果apk文件在外置存储目录, 我们需要移动到其它可以安装到位置, 否则会报错!
     if "/sdcard/" in path or "/storage/emulated/0/" in path:
         return "success" in shell(
@@ -541,16 +631,20 @@ def app_apk_install(path: str) -> bool:
     return "success" in shell(f"pm install -r {path} && echo success")
 
 
-def paste(text: str):
+def set_clipboard(text: str):
     """
-    :param text 要复制粘贴到文本
-    复制文本到粘贴板, 在高级的安卓版本可能被受到限制, 注意自行测试
+    复制文本到粘贴板, 在高级的安卓版本可能被受到限制, 注意自行测试, 在高版本安卓中, 应启用YY输入法方可进行稳定的获取
+
+    :param text: 要复制粘贴到文本
+    :returns: 无
     """
     engine_api("/paste", {text: text})
 
 
-def get_clipboard():
+def get_clipboard() -> str:
     """
     获取粘贴板文本, 在安卓9以上被限制, 需要启用YY输入法进行获取
+
+    :returns: 粘贴板文本
     """
     return engine_api("/clipboard-text", {})
