@@ -98,7 +98,7 @@ edit-user:
 space-4:
   height: 20
 
-# 输入 示例: 使用 read_config_value("edit-passwrod") 读取
+# 输入 示例: 使用 Config.read_config_value("edit-passwrod") 读取
 edit-passwrod:
   title: "运行模式"
   value: "运行模式1"

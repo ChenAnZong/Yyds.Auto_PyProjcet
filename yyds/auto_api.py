@@ -58,12 +58,15 @@ class Config:
     可视作一个小型的配置存储类, 并与设备的ui的配置共享同一个存储位置
     所有配置序列化为将配置保存为json格式, 如需读写大量数据, 请使用 👉`sqlite`
     """
-    config_path = f"/sdcard/Yyds.Py/config/{ProjectEnvironment.current_project()}.json"
+
+    @classmethod
+    def get_config_path(cls) -> str:
+        return f"/sdcard/Yyds.Py/config/{ProjectEnvironment.current_project()}.json"
 
     @classmethod
     def reload_config(cls):
         try:
-            with open(cls.config_path, mode="r") as fr:
+            with open(cls.get_config_path(), mode="r") as fr:
                 ProjectEnvironment.GLOBAL_CONFIG = json.loads(fr.read())
         except:
             pass
@@ -89,8 +92,9 @@ class Config:
                      - int: 返回整数类型值
         :rtype: Union[bool, str, int, None]
         """
-
-        # 每次读取前进行刷新
+        # 判断是否要进行重新读取
+        if read_load or len(ProjectEnvironment.GLOBAL_CONFIG) == 0:
+            cls.reload_config()
         if config_name in ProjectEnvironment.GLOBAL_CONFIG and not read_load:
             return ProjectEnvironment.GLOBAL_CONFIG[config_name]
         if config_name in ProjectEnvironment.GLOBAL_CONFIG:
@@ -107,7 +111,7 @@ class Config:
         :param value: 值
         :returns: 无
         """
-        with open(cls.config_path, mode="w+") as frw:
+        with open(cls.get_config_path(), mode="w+") as frw:
             try:
                 ProjectEnvironment.GLOBAL_CONFIG = json.loads(frw.read())
             except:
@@ -419,11 +423,9 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1)
     """
     [底层接口] 在屏幕上同时寻找多张图片, 可以指定范围\n
 
-    使用例子:
-    ```python
-    # 从屏幕中间往下(1920*0.2)高度, 左边100像素开始寻找, 若分辨率 h=1920
-    screen_find_images("/sdcard/1.png;/sdcard/2.png", y=960, h=0.2, x=100)
-    ```
+    使用例子(从屏幕中间往下(1920*0.2)高度, 左边100像素开始寻找, 若分辨率 h=1920):
+    :: python
+        screen_find_images("/sdcard/1.png;/sdcard/2.png", y=960, h=0.2, x=100)
 
     :param img: 图片路径, 建议使用相对路径, 以兼容电脑运行脚本
     :param x: 识别起始点 可以使用相对坐标(0-1)或绝对像素值, 可以想象是从屏幕左边拉条线出来, 线左边区域不要去查找

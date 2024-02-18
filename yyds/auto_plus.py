@@ -248,8 +248,14 @@ def find_image_click(*img, min_prob=0.5, x=None, y=None, w=None, h=None, offset_
 
 def ocr_exists_all(*text, x=None, y=None, w=None, h=None) -> bool:
     """
-    使用ocr判断当前屏幕上是否所有文字都存在
-    
+    使用ocr判断当前屏幕上是否所有文字都存在\n
+
+    使用例子:若屏幕指定位置存在“去添加” 则找图进行点击
+    ::
+        ocr_exists_all("去添加", y=0.75, x=0.3, w=0.5) and find_image_click("img/今日头条开红包叉.jpg", y=0.5,
+                                                                                        w=0.15, threshold=0)
+
+
     :param text: 可变参数, 要判断的文字
     :returns: 是否所有文字都存在
     """
@@ -259,8 +265,12 @@ def ocr_exists_all(*text, x=None, y=None, w=None, h=None) -> bool:
 
 def ocr_exists_any(*text, x=None, y=None, w=None, h=None) -> bool:
     """
-    使用ocr判断当前屏幕上是否任意文字存在
-    
+    使用ocr判断当前屏幕上是否任意文字存在\n
+
+    使用例子:若屏幕指定位置存在任意文字 立即领取、拆、点击领取现金、立即提现、同意并继续, 则找图进行点击
+    ::
+        ocr_click_any("立即领取", "拆", "点击领取现金", "立即提现", "同意并继续", y=0.5, h=0.3) and toast("存在任意文字")
+
     :param text: 可变参数, 要判断的文字
     :returns: 是否任意文字都存在
     """

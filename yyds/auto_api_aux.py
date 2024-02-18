@@ -174,7 +174,7 @@ def device_code() -> str:
 def device_model() -> str:
     """
     获取当前手机型号
-    学习指南:类似命令可以自定义很多, 比如获取当前设备代号 ```shell("getprop ro.product.device")```
+    学习指南:类似命令可以自定义很多, 比如获取当前设备代号 ``shell("getprop ro.product.device")``
 
     :returns: 手机型号
     """
@@ -225,10 +225,11 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
     """
     扫描当前屏幕所有ui控件并进行匹配\n
 
-    注意因为python中变量命名无法包含横杠-, 所以使用_代替, class用class_代替\n
-    ```python
-    ui_match(context_desc="资讯", drawing_order="2")
-    ```
+    ::
+
+        # 注意因为python中变量命名无法包含横杠-, 所以使用_代替, class用class_代替
+        ui_match(context_desc="资讯", drawing_order="2")
+
 
     **支持以下匹配规则**\n
     1. 使用正则(适用java正则)
@@ -248,10 +249,11 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
     \n
     匹配例子:
 
-    ````python
-    # 结合位置, 大于进行定位, top=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
-    ui_match(text="我的", top=0.5, width=">10")
-    ````
+    ::
+
+        # 结合位置, 大于进行定位, top=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
+        ui_match(text="我的", top=0.5, width=">10")
+
 
     :param match_params: 匹配参数, 有多个匹配参数就需要匹配全部参数
     :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
@@ -343,16 +345,15 @@ def screen_find_image_x(fd_images: Union[Tuple[str, ...], Tuple[RequestFindImage
                         min_prob: float = 0.5, x=None, y=None, w=None, h=None, threshold: int = -1) \
         -> Tuple[ResFindImage]:
     """
-    查找图片
+    对于同时查找多张图片的封装
 
-    :param fd_images 需要查找的图片, 图片数组或元祖, 需要一个可迭代的对象
-    :param min_prob  float 最低置信率
+    :param fd_images: 需要查找的图片, 图片数组或元祖, 需要一个可迭代的对象
+    :param min_prob:  float 最低置信率
     :param x: 识别起始点 可以使用相对坐标(0-1)
     :param y: 识别起始点 可以使用相对坐标(0-1)
     :param w: 宽 可以使用相对坐标(0-1)
     :param h: 高 可以使用相对坐标(0-1)
-    :param threshold 图片预处理方式 参考`screen_find_image()`
-
+    :param threshold: 图片预处理方式 参考`screen_find_image()`
     :rtype: Tuple[ResFindImage]
     :returns: 找图结果
     """
