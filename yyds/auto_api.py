@@ -454,16 +454,17 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1)
     return engine_api("/screen-find-images", args)
 
 
-def ui_dump_xml(path=None) -> str:
+def ui_dump_xml(path=None, all_window=False) -> str:
     """
     [底层接口] 扫描控件布局xml到本地, 一般来说, 在脚本上自行解析xml文件比较复杂, 建议直接使用`ui_match`函数
 
     :param path: 保存到本地路径
+    :param all_window: 是否查询所有窗口, 比如悬浮窗口
     :returns: 保存的路径
     """
     if path is None:
         path = ProjectEnvironment.DEFAULT_UI_DUMP_PATH
-    return engine_api("/uia-dump", {"path": path})
+    return engine_api("/uia-dump", {"path": path, "all_window": "true" if all_window else "false"})
 
 
 def match_images(template_image: str, prob: float, threshold=0, image=None, x=None, y=None, w=None, h=None) -> \

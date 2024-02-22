@@ -221,7 +221,7 @@ def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
     })
 
 
-def ui_match(match_from_cache=False, **match_params) -> List[Node]:
+def ui_match(all_window=False, match_from_cache=False, **match_params) -> List[Node]:
     """
     扫描当前屏幕所有ui控件并进行匹配\n
 
@@ -254,7 +254,7 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
         # 结合位置, 大于进行定位, top=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
         ui_match(text="我的", top=0.5, width=">10")
 
-
+    :param all_window: 是否查找所有窗口(一般app不用, 为了查找悬浮窗, 特殊系统控件用), 如果从缓存中查找, 此参数将被忽略
     :param match_params: 匹配参数, 有多个匹配参数就需要匹配全部参数
     :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :returns: 识别结果, 匹配到的节点数组, 如匹配失败, 返回空数组
@@ -265,6 +265,8 @@ def ui_match(match_from_cache=False, **match_params) -> List[Node]:
             params_["class"] = match_params[k]
         else:
             params_[str(k).replace("_", "-")] = match_params[k]
+    if not match_from_cache and all_window:
+        params_["all_window"] = "true"
     ret_str = engine_api("/uia-match", params_)
     return [Node(i) for i in json.loads(ret_str)]
 
@@ -315,10 +317,10 @@ def ui_sib(node: Node) -> List[Node]:
     return [Node(i) for i in json.loads(ret_str)]
 
 
-def ui_exist(match_from_cache=False, **match_params) -> bool:
+def ui_exist(all_window=False, match_from_cache=False, **match_params) -> bool:
     """
     检查符合条件的控件是否存在
-
+    :param all_window: 是否查找所有窗口
     :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :returns: ui是否存在
     """
@@ -329,6 +331,8 @@ def ui_exist(match_from_cache=False, **match_params) -> bool:
             params_["class"] = match_params[k]
         else:
             params_[str(k).replace("_", "-")] = match_params[k]
+    if not match_from_cache and all_window:
+        params_["all_window"] = "true"
     return len(engine_api("/uia-match", params_)) > 1
 
 
