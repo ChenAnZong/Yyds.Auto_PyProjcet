@@ -296,8 +296,8 @@ def engine_api(uri: str, options=None) -> str:
                 params.put(key, str(options[key]))
         ret = EngineApi.http(uri, params)
     else:
-        # 49009是引擎通讯端口
-        ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009{uri}", json=options).text
+        # 61140是引擎通讯端口
+        ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:61140/api{uri}", json=options).text
     if ProjectEnvironment.DEBUG_MODE:
         t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"{t}:{uri}__{options}___))){ret})))))))\n")
@@ -589,7 +589,7 @@ def pull_file(remote: str, local: str) -> bool:
     :param local: 本地文件路径
     :returns: 是否操作成功
     """
-    r = requests.get(f"http://{ProjectEnvironment.DEBUG_IP}:49009/pull-file?path={remote}", stream=True)
+    r = requests.get(f"http://{ProjectEnvironment.DEBUG_IP}:61140/pull-file?path={remote}", stream=True)
     if r.status_code == 200:
         with open(local, 'wb+') as f:
             r.raw.decode_content = True
@@ -608,7 +608,7 @@ def post_file(local: str, remote_dir: str = "/sdcard") -> bool:
     """
     print("参数:", remote_dir, os.path.basename(local))
     f = open(local, mode="rb")
-    r = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:49009/post-file", data={
+    r = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:61140/post-file", data={
         "path": remote_dir
     }, files={
         os.path.basename(local): f.read()
