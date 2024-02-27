@@ -207,7 +207,7 @@ def main():
     # log_d("兄", ui_sib(ks))
     # log_d("父", ui_parent(ks))
     # log_d("子", ui_child(ks))
-
+    # print(screen_find_image_x(("img/area_llq.jpg",), x=0.2, y=300))
     # 主页有一堆图标, 点击桌面的第一个应用
     # click_target(ui_sib(ks)[0])
 

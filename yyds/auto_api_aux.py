@@ -221,7 +221,7 @@ def model_ocr_reload(ncnn_bin_path, ncnn_param_path):
     })
 
 
-def ui_match(all_window=False, match_from_cache=False, **match_params) -> List[Node]:
+def ui_match(all_window=False, match_from_cache=False, limit=9999, **match_params) -> List[Node]:
     """
     扫描当前屏幕所有ui控件并进行匹配\n
 
@@ -255,16 +255,21 @@ def ui_match(all_window=False, match_from_cache=False, **match_params) -> List[N
         ui_match(text="我的", top=0.5, width=">10")
 
     :param all_window: 是否查找所有窗口(一般app不用, 为了查找悬浮窗, 特殊系统控件用), 如果从缓存中查找, 此参数将被忽略
-    :param match_params: 匹配参数, 有多个匹配参数就需要匹配全部参数
+    :param match_params: 匹配参数, 从xml匹配的key-value, 有多个匹配参数就需要匹配全部参数, 支持java正则, 所有value为字符串形式. 如visible_to_user="true"
+    :param limit: 最多查找多少个就返回, 控件过多情况下可提高查找效率
     :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
     :returns: 识别结果, 匹配到的节点数组, 如匹配失败, 返回空数组
     """
     params_ = {"match_from_cache": "true" if match_from_cache else "false"}
     for k in match_params.keys():
+        value = match_params[k]
+        # 转为java的小写形式
+        if isinstance(value, bool):
+            value = str(value).lower()
         if k == "class_":
-            params_["class"] = match_params[k]
+            params_["class"] = value
         else:
-            params_[str(k).replace("_", "-")] = match_params[k]
+            params_[str(k).replace("_", "-")] = value
     if not match_from_cache and all_window:
         params_["all_window"] = "true"
     ret_str = engine_api("/uia-match", params_)
@@ -319,21 +324,13 @@ def ui_sib(node: Node) -> List[Node]:
 
 def ui_exist(all_window=False, match_from_cache=False, **match_params) -> bool:
     """
-    检查符合条件的控件是否存在
+    检查符合条件的控件是否存在, 更多细节参考`ui_match`
     :param all_window: 是否查找所有窗口
     :param match_from_cache: 是否从引擎缓存中拉取控件, 而不是从系统从新获取控件; 适合于确保当前画面没有变化的界面, 提高运行效率
+    :param 从xml匹配的key-value, 支持java正则, 所有value为字符串形式如visible_to_user="true"
     :returns: ui是否存在
     """
-    params_ = {"match_from_cache": "true" if match_from_cache else "false"}
-    match_params["limit"] = 1
-    for k in match_params.keys():
-        if k == "class_":
-            params_["class"] = match_params[k]
-        else:
-            params_[str(k).replace("_", "-")] = match_params[k]
-    if not match_from_cache and all_window:
-        params_["all_window"] = "true"
-    return len(engine_api("/uia-match", params_)) > 1
+    return len(ui_match(all_window, match_from_cache, limit=1, **match_params)) > 1
 
 
 def shell(*cmd):
