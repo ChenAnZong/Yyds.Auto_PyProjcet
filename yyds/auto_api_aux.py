@@ -330,7 +330,7 @@ def ui_exist(all_window=False, match_from_cache=False, **match_params) -> bool:
     :param 从xml匹配的key-value, 支持java正则, 所有value为字符串形式如visible_to_user="true"
     :returns: ui是否存在
     """
-    return len(ui_match(all_window, match_from_cache, limit=1, **match_params)) > 1
+    return len(ui_match(all_window, match_from_cache, limit=1, **match_params)) >= 1
 
 
 def shell(*cmd):
