@@ -6,25 +6,37 @@ import time
 
 class DeviceScreen:
     # 屏幕宽高
-    _dw: int = 1080
-    _dh: int = 2400
+    _dw: int = None
+    _dh: int = None
+    _has_init = False
+
+    @classmethod
+    def _ensure_init(cls):
+        if not cls._has_init:
+            cls.init()
 
     @classmethod
     def init(cls):
-        # 初始化设备参数
+        """
+        初始化设备参数, 如果屏幕方向发生变化, 宽高值会交换, 注意重新进行获取
+        """
         cls._dw, cls._dh = device_get_screen_size()
         log_d(f"当前设备: {device_model()} {DeviceScreen._dw}x{DeviceScreen._dh}")
+        cls._has_init = True
 
     @classmethod
     def get_screen_wh(cls):
+        cls._ensure_init()
         return cls._dw, cls._dh
 
     @classmethod
     def get_h(cls):
+        cls._ensure_init()
         return cls._dh
 
     @classmethod
     def get_w(cls):
+        cls._ensure_init()
         return cls._dw
 
 
