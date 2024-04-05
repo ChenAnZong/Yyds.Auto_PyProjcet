@@ -37,10 +37,9 @@ class Color:
         """
         h1, s1, v1 = colorsys.rgb_to_hsv(self.r, self.g, self.b)
         h2, s2, v2 = colorsys.rgb_to_hsv(color2.r, color2.g, color2.b)
-
         hue_diff = min(abs(h1 - h2), 1 - abs(h1 - h2))
         saturation_diff = abs(s1 - s2)
-        value_diff = abs(v1 - v2)
+        value_diff = abs(v1 - v2) / 255
         similarity = (1 - hue_diff) * (1 - saturation_diff) * (1 - value_diff)
 
         return similarity
