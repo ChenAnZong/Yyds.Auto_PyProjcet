@@ -12,8 +12,10 @@ import hashlib
 import importlib
 from typing import Union, Tuple, List, Optional
 from .auto_entity import *
-from .util import log_d
-from .util import log_e
+from .util import Logger
+
+log_d = Logger.log_d
+log_e = Logger.log_e
 
 
 class ProjectEnvironment:
@@ -24,6 +26,8 @@ class ProjectEnvironment:
     DEFAULT_SCREEN_SHOT_PATH = "/sdcard/screenshot.png"
     # 默认的控件信息抓取保存目录
     DEFAULT_UI_DUMP_PATH = "/data/local/tmp/dump.xml"
+    # 暂停脚本运行标志
+    STOP_ENGINE_FLAG = "/data/local/tmp/stop_engine"
     # 当前手机运行的工程目录
     CWD = os.getcwd()
     # 在开发中, 如果是调试模式, 将会打印更多日志
@@ -259,6 +263,7 @@ try:
     # 下面两句代码调用java, 与自动化引擎进行通讯, 在IDE中识别不到, 会提示错误请忽略!
     from uiautomator import ExportHandle as EngineApi
     from java.util import HashMap
+
     ProjectEnvironment.IMPORT_JAVA_SUCCESS = True
 except:
     # 如果是PC环境运行, 会导入失败, 使用http与引擎进行通讯, 使用在电脑上可以正常运行代码
@@ -271,7 +276,7 @@ except:
         config_path = os.path.join(os.path.dirname(__file__), "../project.config")
     if not os.path.exists(config_path):
         raise RuntimeError("配置文件不存在:" + config_path)
-    project_config.read(config_path)
+    project_config.read(config_path, "utf-8")
     ProjectEnvironment.DEBUG_IP = project_config["default"]["DEBUG_DEVICE_IP"]
     ProjectEnvironment.PROJECT_NAME = project_config["default"]["PROJECT_NAME"]
     log_d(f"当前连接调试设备IP: {ProjectEnvironment.DEBUG_IP}")
@@ -285,6 +290,22 @@ def engine_api(uri: str, options=None) -> str:
     :param options: 参数，字典类型，所有键值都应为str类型
     :returns: 引擎返回的结果, 所有结果均由字符串进行表示, 一般后续需要进行一定的序列化处理
     """
+
+    # 增加脚本暂停功能, 最大暂停时间2分钟
+    count = 0
+    while sys.platform == "linux" and os.path.exists(ProjectEnvironment.STOP_ENGINE_FLAG):
+        if count == 1:
+            print("当前引擎被暂停!最大暂停时间2分钟")
+        time.sleep(3)
+        count += 1
+        if count > 40:
+            try:
+                os.remove(ProjectEnvironment.STOP_ENGINE_FLAG)
+            except FileNotFoundError:
+                pass
+            finally:
+                break
+
     if options is None:
         options = {}
     if options is None:
@@ -297,6 +318,7 @@ def engine_api(uri: str, options=None) -> str:
         ret = EngineApi.http(uri, params)
     else:
         # 61140是引擎通讯端口
+        print(f"http://{ProjectEnvironment.DEBUG_IP}:61140/api{uri}")
         ret = requests.post(f"http://{ProjectEnvironment.DEBUG_IP}:61140/api{uri}", json=options).text
     if ProjectEnvironment.DEBUG_MODE:
         t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -304,16 +326,37 @@ def engine_api(uri: str, options=None) -> str:
     return ret
 
 
-def click(x: Union[str, int], y: Union[str, int]):
+def click(x: Union[str, int], y: Union[str, int], click_time: int = 1, interval: int = 50) -> bool:
     """
     点击坐标点
 
     :param x: 屏幕绝对坐标，不支持小数
     :param y: 屏幕绝对坐标，不支持小数
+    :param click_time: 抢购, 开宝箱, 高速点赞
+    :param interval: 连点间隔
     """
     x += random.randint(-3, 3)
     y += random.randint(-5, 5)
-    engine_api("/touch", {"x": int(x), "y": int(y)})
+    x = max(1, abs(x))
+    y = max(1, abs(y))
+    return engine_api("/touch", {"x": int(x), "y": int(y), "time": click_time, "interval": interval}) != "false"
+
+
+def update_language(code: str) -> bool:
+    """
+    设置安卓系统语言
+    :param code: 语言码-国家码, 如 en-us
+    """
+    return engine_api("/update-language", {"code": code}) == "true"
+
+
+def media_scan_file(path: str) -> bool:
+    """
+    安卓系统媒体文件扫描
+
+    :param path: 文件路径, 如多个使用;分隔
+    """
+    return engine_api("/media-scan-file", {"path": path}) == "true"
 
 
 def random_click(x: int, y: int, w: int, h: int):
@@ -441,6 +484,8 @@ def screen_find_image(*img, x=None, y=None, w=None, h=None, threshold: int = -1)
     # 如果脚本在电脑上运行, 需要将图片文件提交到手机指定目录
     if not ProjectEnvironment.IMPORT_JAVA_SUCCESS:
         imgs_ = []
+        if img[0] is tuple:
+            img = img[0]
         for pi in img:
             imgs_.append(os.path.join(ProjectEnvironment.current_project_dir(), pi))
             if not post_file(pi, os.path.join(ProjectEnvironment.current_project_dir(), os.path.dirname(pi))):

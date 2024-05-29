@@ -1,9 +1,28 @@
+# 更加人性化的生产力自动化脚本开发
+![软件LOGO](https://yydsxx.com/img/snake.gif)
+
 **- 🧞‍♂️本项目为 [Yyds.Auto](www.yydsxx.com) python api更新参考(可转化为其它语言的开发)以及作为脚本项目开发模版**
 
-**- 安卓自动化开发、脚本开发、群控开发优质项目, 可替代[uiautomator2](https://github.com/openatx/uiautomator2)**
+**- 安卓自动化开发、脚本开发、群控开发优质项目, 某种需求上替代[uiautomator2](https://github.com/openatx/uiautomator2)与替代[appium](https://github.com/appium/appium)**
 
 # 特性
-包含大量安卓自动化功能的接口实现, 支持安卓7-14, 支持云机与模拟器, 支持电脑运行脚本与手机运行脚本
+开箱即用, 无需注册, 永久免费, 天然绿色产品, 包含大量人性化的安卓自动化功能的接口实现, 支持安卓7-14, 支持云机与模拟器, 支持电脑运行脚本与手机运行脚本
+
+## 使用HTTP接口对自动化功能进行调用
+如下192.168.1.100为手机设备IP地址, 61140为自动化引擎开放端口
+
+```shell
+# 在BASH中
+curl -X POST -d '{"x": 100, "y": 100}' http://192.168.1.100:61140/api/click
+```
+
+```python
+import requests
+requests.post("http://192.168.1.100:61140/api/click", json={
+    "x": 100,
+    "y": 100
+})
+```
 
 # 发现了错误或找到了bug
 你真厉害, 可以提交issue与联系作者进行修改, 谢谢🙏

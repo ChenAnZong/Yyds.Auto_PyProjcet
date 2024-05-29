@@ -241,11 +241,11 @@ def ui_match(all_window=False, match_from_cache=False, limit=9999, **match_param
     4. 使用控件尺寸进行定位, 支持 > 与 < 符号进行范围指定
         - width 宽
         - height 高
-    5. 限制控件屏幕方位
-        - top 上
-        - bottom 下
-        - left 左
-        - right  右
+    5. 限制控件屏幕区域, 与找图区域范围规则保持一致
+        - x
+        - y
+        - w
+        - h
     \n
     匹配例子:
 
@@ -320,6 +320,21 @@ def ui_sib(node: Node) -> List[Node]:
     }
     ret_str = engine_api("/uia-relation", params_)
     return [Node(i) for i in json.loads(ret_str)]
+
+
+def ui_sid_offset(node: Node, next_count: int = 1) -> Union[Node, None]:
+    """
+    下next_count个兄弟节点, 默认是下一个
+    :returns: 匹配到的节点
+    """
+    sibs = ui_sib(node)
+    if sibs:
+        for n in sibs:
+            if n.index == node.index + next_count:
+                return n
+        return None
+    else:
+        return None
 
 
 def ui_exist(all_window=False, match_from_cache=False, **match_params) -> bool:
