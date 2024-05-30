@@ -1,4 +1,4 @@
-# 更加人性化的生产力自动化脚本开发
+# 更加人性化的生产力安卓自动化脚本开发
 ![软件LOGO](https://yydsxx.com/img/snake.gif)
 
 **- 🧞‍♂️本项目为 [Yyds.Auto](www.yydsxx.com) python api更新参考(可转化为其它语言的开发)以及作为脚本项目开发模版**
@@ -6,23 +6,49 @@
 **- 安卓自动化开发、脚本开发、群控开发优质项目, 某种需求上替代[uiautomator2](https://github.com/openatx/uiautomator2)与替代[appium](https://github.com/appium/appium)**
 
 # 特性
-开箱即用, 无需注册, 永久免费, 天然绿色产品, 包含大量人性化的安卓自动化功能的接口实现, 支持安卓7-14, 支持云机与模拟器, 支持电脑运行脚本与手机运行脚本
+开箱即用, 无需注册, 永久免费, 天然绿色产品, 包含大量人性化的安卓自动化功能的接口实现, 不依赖无障碍, 支持安卓7-14, 支持云机与模拟器, 同时支持电脑运行脚本与手机运行脚本
 
 ## 使用HTTP接口对自动化功能进行调用
 如下192.168.1.100为手机设备IP地址, 61140为自动化引擎开放端口
 
+### 点击
 ```shell
-# 在BASH中
-curl -X POST -d '{"x": 100, "y": 100}' http://192.168.1.100:61140/api/click
+curl -X POST -d '{"x": 100, "y": 100}' http://192.168.1.100:61140/api/touch
 ```
 
 ```python
 import requests
-requests.post("http://192.168.1.100:61140/api/click", json={
+requests.post("http://192.168.1.100:61140/api/touch", json={
     "x": 100,
     "y": 100
 })
 ```
+
+### OCR
+```shell
+curl -X POST  http://192.168.1.100:61140/api/screen-ocr
+```
+
+```python
+import requests
+requests.post("http://192.168.1.100:61140/api/screen-ocr")
+```
+
+
+
+### 控件查找与匹配(支持正则匹配)
+```shell
+curl -X POST -d '{"text": "Add.*?"}' http://192.168.1.100:61140/api/ui-match
+```
+
+```python
+import requests
+requests.post("http://192.168.1.100:61140/api/ui-match", json={
+    "text": "Add.*?"
+})
+```
+
+### 🔥更多例子请参考源代码, 可根据自己项目修改定制群控
 
 # 发现了错误或找到了bug
 你真厉害, 可以提交issue与联系作者进行修改, 谢谢🙏
@@ -33,6 +59,9 @@ requests.post("http://192.168.1.100:61140/api/click", json={
 3. 我们在开发项目的时候, 可以参考函数实现以及进行改动, 除了引擎接口通讯部分内容, 其它所有内容均可自行删减修改
 4. 本工程包含一些用于学习以及测试的代码, 对于业务可能意义不大, 请自行分析并理解
 5. 很多功能是可以自己去做的, 不一定要这个工程提供的, 比如我们要做压缩文件, 图片裁剪, 稍微百度一下就能做了嘞!
+
+# 视频教程
+[Yyds.Auto Python自动化脚本开发(Bilibli!)](https://space.bilibili.com/413090517)
 
 # 版本变更
 [官方链接](https://yydsxx.com/docs/yyds-auto/update_history)
