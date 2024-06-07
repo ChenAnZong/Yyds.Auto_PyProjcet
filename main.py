@@ -84,7 +84,7 @@ def test_input_search():
     key_confirm()
 
 
-def main_():
+def pc():
     # 初始化设备屏幕参数以便使用坐标缩放以及随机性触摸函数
     DeviceScreen.init()
 
@@ -141,7 +141,7 @@ def main_():
 
     # 设置配置键值
     # Config.write_config_value("edit-user", "陈主任")
-
+    print(get_clipboard())
     # 寻找所有图片，最小相似度为0.7，如发现则点击
     find_image_click_max_prob(
         "ttxcy/开启转盘.jpg",
@@ -213,6 +213,6 @@ def main():
     # click_target(ui_sib(ks)[0])
 
 
-# 如果在电脑运行脚本, 则主动调用main()入口函数
-if not ProjectEnvironment.IMPORT_JAVA_SUCCESS:
-    main()
+# 如果需要在电脑运行脚本, 可以判断一下环境
+if not os.path.exists("/sdcard"):
+    pc()

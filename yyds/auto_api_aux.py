@@ -251,8 +251,8 @@ def ui_match(all_window=False, match_from_cache=False, limit=9999, **match_param
 
     ::
 
-        # 结合位置, 大于进行定位, top=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
-        ui_match(text="我的", top=0.5, width=">10")
+        # 结合位置, 大于进行定位, x=0.5意思是从屏幕中间往下开始找, width>10 意思是控件的宽大于10
+        ui_match(text="我的", x=0.5, width=">10")
 
     :param all_window: 是否查找所有窗口(一般app不用, 为了查找悬浮窗, 特殊系统控件用), 如果从缓存中查找, 此参数将被忽略
     :param match_params: 匹配参数, 从xml匹配的key-value, 有多个匹配参数就需要匹配全部参数, 支持java正则, 所有value为字符串形式. 如visible_to_user="true"
@@ -324,7 +324,7 @@ def ui_sib(node: Node) -> List[Node]:
 
 def ui_sid_offset(node: Node, next_count: int = 1) -> Union[Node, None]:
     """
-    下next_count个兄弟节点, 默认是下一个
+    :param next_count: 偏移个兄弟节点, 默认是下一个, 可以为负数, 则向上找兄弟节点
     :returns: 匹配到的节点
     """
     sibs = ui_sib(node)
