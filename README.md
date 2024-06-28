@@ -60,8 +60,6 @@ requests.post("http://192.168.1.100:61140/api/ui-match", json={
 4. 本工程包含一些用于学习以及测试的代码, 对于业务可能意义不大, 请自行分析并理解
 5. 很多功能是可以自己去做的, 不一定要这个工程提供的, 比如我们要做压缩文件, 图片裁剪, 稍微百度一下就能做了嘞!
 
-# 视频教程
-[Yyds.Auto Python自动化脚本开发(Bilibli!)](https://space.bilibili.com/413090517)
 
 # 版本变更
 [官方链接](https://yydsxx.com/docs/yyds-auto/update_history)
@@ -70,8 +68,6 @@ requests.post("http://192.168.1.100:61140/api/ui-match", json={
 [APK以及开发插件下载地址](https://yydsxx.com/download)
 
 [文档网站 https://yydsxx.com/docs/yyds-auto/script](https://yydsxx.com/docs/yyds-auto/script)
-
-
 
 # 文件指引
 | 文件/目录             | 重要性 | 作用                            |
@@ -89,6 +85,15 @@ requests.post("http://192.168.1.100:61140/api/ui-match", json={
 | content.txt          | 可删  | 测试文本读取的文件                     |
 | README.md            | 可删  | 项目介绍文件                        |  
 
+# 其它
+## Yyds.Auto 开发插件源代码
+[开发插件 https://github.com/ChenAnZong/Yyds.Auto-IntellIjDevPlugin.git](https://github.com/ChenAnZong/Yyds.Auto-IntellIjDevPlugin.git)
+
+## 视频教程
+[Yyds.Auto Python自动化脚本开发(Bilibli!)](https://space.bilibili.com/413090517)
+
+## 支持使用Shizuku激活
+[Shizuku官网 https://shizuku.rikka.app/](https://shizuku.rikka.app/)
 
 # 联系交流
 [联系作者 | QQ交流群](https://yydsxx.com/contact)

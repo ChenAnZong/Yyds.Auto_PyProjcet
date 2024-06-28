@@ -59,7 +59,7 @@ def key_code(code):
 
     :param code: 键值码
     """
-    engine_api("/key-code", {"code", int(code)})
+    engine_api("/key-code", {"code": int(code)})
 
 
 def device_get_screen_size() -> (int, int):

@@ -182,6 +182,8 @@ def main():
     # 打印与自动化引擎的跨进城通讯日志, 适用于调试, 会打印大量日志
     engine_set_debug(True)
     set_yy_input_enable(True)
+    DeviceScreen.init()
+    swipe(500, 1800, 500, 1000, 500)
     log_d("===开始脚本执行! ")
     # log_d("获取坐标颜色:", get_color(979, 611))
     # # 如下, 我们查找yyds.auto app上面两个绿色勾勾的位置!
